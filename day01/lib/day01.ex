@@ -9,6 +9,20 @@ defmodule Day01 do
     |> Enum.sum()
   end
 
+  def part2() do
+    module_masses()
+    |> Enum.map(&total_fuel_required/1)
+    |> Enum.sum()
+  end
+
+  def total_fuel_required(mass) do
+    mass
+    |> Stream.iterate(&fuel_required/1)
+    |> Enum.take_while(&(&1 > 0))
+    |> Kernel.tl()
+    |> Enum.sum()
+  end
+
   defp module_masses() do
     Path.expand("../data/input.txt", __DIR__)
     |> File.read!()
