@@ -18,8 +18,9 @@ defmodule Day01 do
   def total_fuel_required(mass) do
     mass
     |> Stream.iterate(&fuel_required/1)
+    # first value is mass
+    |> Stream.drop(1)
     |> Enum.take_while(&(&1 > 0))
-    |> Kernel.tl()
     |> Enum.sum()
   end
 
