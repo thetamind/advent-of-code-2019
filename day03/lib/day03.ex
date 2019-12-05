@@ -43,15 +43,8 @@ defmodule Day03 do
     end
   end
 
-  def wires_to_intersections(wires) do
-    wires
-    |> Enum.map(&vectors_to_coordinates/1)
-  end
-
-  def vectors_to_coordinates(vectors) do
-    Enum.reduce(vectors, [], fn vec, acc ->
-      nil
-    end)
+  def wires_to_intersections([wire1, wire2] = _wires) do
+    Day03.Wire.intersections(wire1, wire2)
   end
 
   def parse_to_tokens(input) do
@@ -103,6 +96,79 @@ defmodule Day03 do
         end
       end)
     end
+
+    def intersections(wire1, wire2) do
+      segments2 = segments(wire2)
+
+      segments(wire1)
+      |> Enum.reduce([], fn segment, acc ->
+        found =
+          Enum.filter(segments2, fn needle ->
+            cover?(segment, needle)
+          end)
+          |> Enum.map(&find_intersection(segment, &1))
+          |> Enum.reject(&Kernel.is_nil/1)
+          |> Enum.reject(fn {x, y} -> x == 0 and y == 0 end)
+
+        [found | acc]
+      end)
+      |> List.flatten()
+    end
+
+    #   +    3
+    #   |
+    # +-X--+
+    #   |
+    #   +
+    def find_intersection(segment1, segment2) do
+      {segmentA, segmentB} =
+        cond do
+          horizontal?(segment1) -> {segment1, segment2}
+          vertical?(segment1) -> {segment2, segment1}
+        end
+
+      # y is same
+      [{ax1, ay}, {ax2, _ay}] = segmentA
+      [{bx, by1}, {_bx, by2}] = segmentB
+
+      if Enum.member?(Range.new(ax1, ax2), bx) and Enum.member?(Range.new(by1, by2), ay) do
+        {bx, ay}
+      end
+
+      #   vertical?(segmentA) ->
+      #     # x is same
+      #     [{ax, ay1}, {_ax, ay2}] = segmentA
+      #     [{bx1, by}, {bx2, _by}] = segmentB
+
+      #     if Enum.member?(Range.new(ax1, ax2), bx) and Enum.member?(Range.new(by1, by2), ay) do
+      #       {bx, ay}
+      #     end
+      # end
+    end
+
+    require Logger
+
+    def cover?(self, other) do
+      cond do
+        horizontal?(self) and vertical?(other) ->
+          true
+
+        vertical?(self) and horizontal?(other) ->
+          true
+
+        true ->
+          # IO.puts("self: horz: #{horizontal?(self)} vert: #{vertical?(self)} #{inspect(self)}")
+
+          # IO.puts("othr: horz: #{horizontal?(other)} vert: #{vertical?(other)} #{inspect(other)}")
+          IO.puts("self #{inspect(self)} and other #{inspect(other)} are same orientation")
+          # raise "self #{inspect(self)} and other #{inspect(other)} are same orientation"
+      end
+    end
+
+    def horizontal?([{_x1, y1}, {_x2, y2}]) when y1 == y2, do: true
+    def horizontal?(_), do: false
+    def vertical?([{x1, _y1}, {x2, _y2}]) when x1 == x2, do: true
+    def vertical?(_), do: false
 
     def segments(wire) do
       Enum.chunk_every(wire.points, 2, 1, :discard)
