@@ -11,15 +11,24 @@ defmodule Day03 do
 
   def part1(input) do
     input
-    # path to coordinates to [wire]
-    |> parse_to_tokens()
-    |> Enum.map(&tokens_to_vectors/1)
-
-    # |> Enum.map(&vectors_to_points/1)
-    # |> Enum.map(&wires_to_intersections/1)
+    |> load()
+    |> wires_to_intersections()
 
     # |> closest_intersection_distance()
   end
+
+  def load(input) do
+    input
+    |> parse_to_tokens()
+    |> Enum.map(&tokens_to_vectors/1)
+    |> Enum.map(&Day03.Wire.from_vectors/1)
+  end
+
+  # def vectors_to_segments(vectors) do
+  #   vectors
+  #   |> List.insert_at(0, {0, 0})
+  #   |> Enum.chunk_every(2, 1)
+  # end
 
   def tokens_to_vectors(tokens) do
     Enum.map(tokens, &token_to_vector/1)
@@ -45,9 +54,6 @@ defmodule Day03 do
     end)
   end
 
-  # defmodule Segment do
-  # defstruct first: nil, last: nil
-
   def parse_to_tokens(input) do
     String.split(input, "\n", trim: true)
     |> Enum.map(&string_to_tokens/1)
@@ -69,5 +75,37 @@ defmodule Day03 do
       end
 
     {direction, String.to_integer(length)}
+  end
+
+  defmodule Wire do
+    defstruct points: []
+
+    def from_vectors(vectors) do
+      points =
+        Enum.scan([{0, 0} | vectors], fn {x1, y1}, {x2, y2} ->
+          {x1 + x2, y1 + y2}
+        end)
+
+      %Wire{points: points}
+    end
+
+    def member?(wire, {xn, yn} = _needle) do
+      Enum.find_value(segments(wire), false, fn [{x1, y1}, {x2, y2}] ->
+        cond do
+          x1 == x2 and x1 == xn ->
+            Enum.member?(y1..y2, yn)
+
+          y1 == y2 and y1 == yn ->
+            Enum.member?(x1..x2, xn)
+
+          true ->
+            false
+        end
+      end)
+    end
+
+    def segments(wire) do
+      Enum.chunk_every(wire.points, 2, 1, :discard)
+    end
   end
 end

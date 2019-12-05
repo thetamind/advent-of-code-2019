@@ -25,18 +25,23 @@ defmodule Day03Test do
            ]
   end
 
-  test "parse_to_wires" do
-    assert Day03.parse_to_wires("R8,U5,L5,D3\nU7,R6,D4,L4") == [
-             [{:right, 8}, {:up, 5}, {:left, 5}, {:down, 3}],
-             [{:up, 7}, {:right, 6}, {:down, 4}, {:left, 4}]
-           ]
+  test "load" do
+    [wire1, wire2] = Day03.load("R8,U5,L5,D3\nU7,R6,D4,L4")
+    assert Day03.Wire.member?(wire1, {0, 0})
+    assert Day03.Wire.member?(wire1, {4, 0})
+    assert Day03.Wire.member?(wire1, {8, 0})
+    refute Day03.Wire.member?(wire1, {9, 0})
+
+    assert Day03.Wire.member?(wire2, {0, 2})
+    assert Day03.Wire.member?(wire2, {2, 3})
+    refute Day03.Wire.member?(wire2, {1, 2})
+    refute Day03.Wire.member?(wire2, {1, 1})
+    assert Day03.Wire.member?(wire2, {-1, -1}) == false
   end
 
   test "wires_to_intersections" do
-    assert Day03.wires_to_intersections([
-             [{:right, 8}, {:up, 5}, {:left, 5}, {:down, 3}],
-             [{:up, 7}, {:right, 6}, {:down, 4}, {:left, 4}]
-           ]) == [{3, 3}, {6, 5}]
+    wires = Day03.load("R8,U5,L5,D3\nU7,R6,D4,L4")
+    assert Day03.wires_to_intersections(wires) == [{3, 3}, {6, 5}]
   end
 
   test "manhattan" do
