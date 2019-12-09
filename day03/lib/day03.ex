@@ -13,8 +13,17 @@ defmodule Day03 do
     input
     |> load()
     |> wires_to_intersections()
+    |> closest_intersection_distance()
+  end
 
-    # |> closest_intersection_distance()
+  def closest_intersection_distance(intersections) do
+    intersections
+    |> Enum.map(&manhattan(&1, {0, 0}))
+    |> Enum.min()
+  end
+
+  def manhattan({x1, y1}, {x2, y2}) do
+    abs(x1 - x2) + abs(y1 - y2)
   end
 
   def load(input) do
@@ -23,12 +32,6 @@ defmodule Day03 do
     |> Enum.map(&tokens_to_vectors/1)
     |> Enum.map(&Day03.Wire.from_vectors/1)
   end
-
-  # def vectors_to_segments(vectors) do
-  #   vectors
-  #   |> List.insert_at(0, {0, 0})
-  #   |> Enum.chunk_every(2, 1)
-  # end
 
   def tokens_to_vectors(tokens) do
     Enum.map(tokens, &token_to_vector/1)
@@ -103,9 +106,8 @@ defmodule Day03 do
       segments(wire1)
       |> Enum.reduce([], fn segment, acc ->
         found =
-          Enum.filter(segments2, fn needle ->
-            cover?(segment, needle)
-          end)
+          segments2
+          |> Enum.filter(&cover?(segment, &1))
           |> Enum.map(&find_intersection(segment, &1))
           |> Enum.reject(&Kernel.is_nil/1)
           |> Enum.reject(fn {x, y} -> x == 0 and y == 0 end)
@@ -115,11 +117,6 @@ defmodule Day03 do
       |> List.flatten()
     end
 
-    #   +    3
-    #   |
-    # +-X--+
-    #   |
-    #   +
     def find_intersection(segment1, segment2) do
       {segmentA, segmentB} =
         cond do
@@ -127,26 +124,13 @@ defmodule Day03 do
           vertical?(segment1) -> {segment2, segment1}
         end
 
-      # y is same
       [{ax1, ay}, {ax2, _ay}] = segmentA
       [{bx, by1}, {_bx, by2}] = segmentB
 
       if Enum.member?(Range.new(ax1, ax2), bx) and Enum.member?(Range.new(by1, by2), ay) do
         {bx, ay}
       end
-
-      #   vertical?(segmentA) ->
-      #     # x is same
-      #     [{ax, ay1}, {_ax, ay2}] = segmentA
-      #     [{bx1, by}, {bx2, _by}] = segmentB
-
-      #     if Enum.member?(Range.new(ax1, ax2), bx) and Enum.member?(Range.new(by1, by2), ay) do
-      #       {bx, ay}
-      #     end
-      # end
     end
-
-    require Logger
 
     def cover?(self, other) do
       cond do
@@ -157,11 +141,7 @@ defmodule Day03 do
           true
 
         true ->
-          # IO.puts("self: horz: #{horizontal?(self)} vert: #{vertical?(self)} #{inspect(self)}")
-
-          # IO.puts("othr: horz: #{horizontal?(other)} vert: #{vertical?(other)} #{inspect(other)}")
-          IO.puts("self #{inspect(self)} and other #{inspect(other)} are same orientation")
-          # raise "self #{inspect(self)} and other #{inspect(other)} are same orientation"
+          false
       end
     end
 
