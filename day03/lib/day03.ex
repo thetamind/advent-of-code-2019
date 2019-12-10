@@ -16,6 +16,17 @@ defmodule Day03 do
     |> closest_intersection_distance()
   end
 
+  def part2(input) do
+    input
+    |> load()
+    |> Day03.Wire.intersections_with_steps()
+    |> shortest_path_length()
+  end
+
+  def shortest_path_length(intersections) do
+    -1
+  end
+
   def closest_intersection_distance(intersections) do
     intersections
     |> Enum.map(&manhattan(&1, {0, 0}))
@@ -74,7 +85,7 @@ defmodule Day03 do
   end
 
   defmodule Wire do
-    defstruct points: []
+    defstruct points: [], steps: []
 
     def from_vectors(vectors) do
       points =
@@ -82,7 +93,12 @@ defmodule Day03 do
           {x1 + x2, y1 + y2}
         end)
 
-      %Wire{points: points}
+      steps =
+        vectors
+        |> List.insert_at(0, {0, 0})
+        |> Enum.scan(0, fn {x, y}, steps -> steps + abs(x) + abs(y) end)
+
+      %Wire{points: points, steps: steps}
     end
 
     def member?(wire, {xn, yn} = _needle) do
@@ -98,6 +114,51 @@ defmodule Day03 do
             false
         end
       end)
+    end
+
+    def segments_with_steps(wire) do
+      wire
+      |> segments()
+      |> Enum.zip(Enum.drop(wire.steps, 1))
+    end
+
+    def intersections_with_steps([wire1, wire2]), do: intersections_with_steps(wire1, wire2)
+
+    def intersections_with_steps(wire1, wire2) do
+      segments1 = segments_with_steps(wire1)
+      segments2 = segments_with_steps(wire2)
+
+      segments1
+      |> Enum.reduce([], fn segment, acc ->
+        found =
+          segments2
+          |> Enum.map(&find_intersections_with_steps(segment, &1))
+          |> Enum.reject(&Kernel.is_nil/1)
+          |> Enum.reject(fn {x, y} -> x == 0 and y == 0 end)
+
+        [found | acc]
+      end)
+      |> List.flatten()
+    end
+
+    def find_intersections_with_steps({segment1, steps1}, {segment2, steps2}) do
+    end
+
+    def find_intersection2(segmentA, segmentB) do
+      [{ax1, ay1}, {ax2, ay2}] = segmentA
+      [{bx1, by1}, {bx2, by2}] = segmentB
+
+      cond do
+        horizontal?(segmentA) and vertical?(segmentB) ->
+          if Enum.member?(Range.new(ax1, ax2), bx1) and Enum.member?(Range.new(by1, by2), ay1) do
+            {bx1, ay1}
+          end
+
+        vertical?(segmentA) and horizontal?(segmentB) ->
+          if Enum.member?(Range.new(bx1, bx2), ax1) and Enum.member?(Range.new(ay1, ay2), by1) do
+            {ax1, by1}
+          end
+      end
     end
 
     def intersections(wire1, wire2) do
