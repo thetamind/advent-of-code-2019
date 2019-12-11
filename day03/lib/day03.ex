@@ -24,7 +24,7 @@ defmodule Day03 do
   end
 
   def shortest_path_length(intersections) do
-    -1
+    Enum.min(intersections)
   end
 
   def closest_intersection_distance(intersections) do
@@ -119,7 +119,7 @@ defmodule Day03 do
     def segments_with_steps(wire) do
       wire
       |> segments()
-      |> Enum.zip(Enum.drop(wire.steps, 1))
+      |> Enum.zip(wire.steps)
     end
 
     def intersections_with_steps([wire1, wire2]), do: intersections_with_steps(wire1, wire2)
@@ -134,7 +134,7 @@ defmodule Day03 do
           segments2
           |> Enum.map(&find_intersections_with_steps(segment, &1))
           |> Enum.reject(&Kernel.is_nil/1)
-          |> Enum.reject(fn {x, y} -> x == 0 and y == 0 end)
+          |> Enum.reject(fn steps -> steps == 0 end)
 
         [found | acc]
       end)
@@ -142,21 +142,34 @@ defmodule Day03 do
     end
 
     def find_intersections_with_steps({segment1, steps1}, {segment2, steps2}) do
+      case find_intersection2(segment1, segment2) do
+        nil ->
+          nil
+
+        segment_steps ->
+          steps1 + steps2 + segment_steps
+      end
     end
+
+    require Logger
 
     def find_intersection2(segmentA, segmentB) do
       [{ax1, ay1}, {ax2, ay2}] = segmentA
       [{bx1, by1}, {bx2, by2}] = segmentB
 
       cond do
-        horizontal?(segmentA) and vertical?(segmentB) ->
+        # and vertical?(segmentB) ->
+        horizontal?(segmentA) ->
           if Enum.member?(Range.new(ax1, ax2), bx1) and Enum.member?(Range.new(by1, by2), ay1) do
-            {bx1, ay1}
+            intersection = {bx1, ay1}
+            manhattan({ax1, ay1}, intersection) + manhattan({bx1, by1}, intersection)
           end
 
-        vertical?(segmentA) and horizontal?(segmentB) ->
+        # and horizontal?(segmentB) ->
+        vertical?(segmentA) ->
           if Enum.member?(Range.new(bx1, bx2), ax1) and Enum.member?(Range.new(ay1, ay2), by1) do
-            {ax1, by1}
+            intersection = {ax1, by1}
+            manhattan({ax1, ay1}, intersection) + manhattan({bx1, by1}, intersection)
           end
       end
     end
@@ -213,6 +226,10 @@ defmodule Day03 do
 
     def segments(wire) do
       Enum.chunk_every(wire.points, 2, 1, :discard)
+    end
+
+    def manhattan({x1, y1}, {x2, y2}) do
+      abs(x1 - x2) + abs(y1 - y2)
     end
   end
 end

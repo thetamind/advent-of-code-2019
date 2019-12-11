@@ -31,7 +31,7 @@ defmodule Day03Test do
 
   test "part 2 result" do
     input = File.read!("data/input.txt")
-    assert Day03.part2(input) == 0
+    assert Day03.part2(input) == 9238
   end
 
   test "parse_to_tokens" do
