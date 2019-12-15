@@ -23,31 +23,6 @@ defmodule Computer do
 
   """
 
-  def part1(input) do
-    input
-    |> load()
-    |> restore(12, 2)
-    |> run()
-    |> Enum.at(0)
-  end
-
-  def part2(input) do
-    memory =
-      input
-      |> load()
-
-    for noun <- 0..99, verb <- 0..99 do
-      memory
-      |> restore(noun, verb)
-      |> run()
-      |> Enum.take(3)
-    end
-    # IDEA: Binary search? Output appears linear
-    |> Enum.find_value(fn [output, noun, verb] ->
-      if output == 19_690_720, do: 100 * noun + verb
-    end)
-  end
-
   def run(memory) do
     do_run(0, memory)
   end
