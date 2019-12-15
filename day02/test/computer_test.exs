@@ -10,4 +10,9 @@ defmodule ComputerTest do
   test "load" do
     assert Computer.load("2,0,0,0,99\n") == [2, 0, 0, 0, 99]
   end
+
+  test "part 2 solution" do
+    input = File.read!("data/input.txt")
+    assert Computer.part2(input) == 5936
+  end
 end
