@@ -50,29 +50,29 @@ defmodule Computer do
     |> List.replace_at(2, 2)
   end
 
-  def do_run(pc, code) do
-    read = code |> Enum.drop(pc) |> Enum.take(4)
-    do_run(read, pc, code)
+  def do_run(ip, code) do
+    read = code |> Enum.drop(ip) |> Enum.take(4)
+    do_run(read, ip, code)
   end
 
-  def do_run([1, inpos1, inpos2, outpos], pc, code) do
+  def do_run([1, inpos1, inpos2, outpos], ip, code) do
     in1 = Enum.at(code, inpos1)
     in2 = Enum.at(code, inpos2)
     value = in1 + in2
 
     code = List.replace_at(code, outpos, value)
 
-    do_run(pc + 4, code)
+    do_run(ip + 4, code)
   end
 
-  def do_run([2, inpos1, inpos2, outpos], pc, code) do
+  def do_run([2, inpos1, inpos2, outpos], ip, code) do
     in1 = Enum.at(code, inpos1)
     in2 = Enum.at(code, inpos2)
     value = in1 * in2
 
     code = List.replace_at(code, outpos, value)
 
-    do_run(pc + 4, code)
+    do_run(ip + 4, code)
   end
 
   def do_run([99 | _], _pc, code) do
