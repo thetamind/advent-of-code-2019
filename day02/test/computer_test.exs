@@ -2,7 +2,7 @@ defmodule ComputerTest do
   use ExUnit.Case
   doctest Computer
 
-  test "part 1 problem" do
+  test "part 1 solution" do
     input = File.read!("data/input.txt")
     assert Computer.part1(input) == 4_462_686
   end

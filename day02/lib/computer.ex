@@ -33,8 +33,8 @@ defmodule Computer do
     |> Enum.at(0)
   end
 
-  def run(code) do
-    do_run(0, code)
+  def run(memory) do
+    do_run(0, memory)
   end
 
   def load(input) do
@@ -44,38 +44,38 @@ defmodule Computer do
     |> Enum.map(&String.to_integer/1)
   end
 
-  def restore(code) do
-    code
-    |> List.replace_at(1, 12)
-    |> List.replace_at(2, 2)
+  def restore(memory, noun, verb) do
+    memory
+    |> List.replace_at(1, noun)
+    |> List.replace_at(2, verb)
   end
 
-  def do_run(ip, code) do
-    read = code |> Enum.drop(ip) |> Enum.take(4)
-    do_run(read, ip, code)
+  def do_run(ip, memory) do
+    read = memory |> Enum.drop(ip) |> Enum.take(4)
+    do_run(read, ip, memory)
   end
 
-  def do_run([1, inpos1, inpos2, outpos], ip, code) do
-    in1 = Enum.at(code, inpos1)
-    in2 = Enum.at(code, inpos2)
+  def do_run([1, inpos1, inpos2, outpos], ip, memory) do
+    in1 = Enum.at(memory, inpos1)
+    in2 = Enum.at(memory, inpos2)
     value = in1 + in2
 
-    code = List.replace_at(code, outpos, value)
+    memory = List.replace_at(memory, outpos, value)
 
-    do_run(ip + 4, code)
+    do_run(ip + 4, memory)
   end
 
-  def do_run([2, inpos1, inpos2, outpos], ip, code) do
-    in1 = Enum.at(code, inpos1)
-    in2 = Enum.at(code, inpos2)
+  def do_run([2, inpos1, inpos2, outpos], ip, memory) do
+    in1 = Enum.at(memory, inpos1)
+    in2 = Enum.at(memory, inpos2)
     value = in1 * in2
 
-    code = List.replace_at(code, outpos, value)
+    memory = List.replace_at(memory, outpos, value)
 
-    do_run(ip + 4, code)
+    do_run(ip + 4, memory)
   end
 
-  def do_run([99 | _], _pc, code) do
-    code
+  def do_run([99 | _], _pc, memory) do
+    memory
   end
 end
