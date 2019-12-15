@@ -4,6 +4,10 @@ defmodule ComputerTest do
 
   test "part 1 problem" do
     input = File.read!("data/input.txt")
-    assert Computer.part1(input) == -111
+    assert Computer.part1(input) == 4_462_686
+  end
+
+  test "load" do
+    assert Computer.load("2,0,0,0,99\n") == [2, 0, 0, 0, 99]
   end
 end
