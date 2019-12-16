@@ -24,7 +24,7 @@ defmodule Computer do
   """
 
   def run(memory) do
-    do_run(0, memory)
+    do_run(memory, %{ip: 0})
   end
 
   def load(input) do
@@ -40,32 +40,32 @@ defmodule Computer do
     |> List.replace_at(2, verb)
   end
 
-  def do_run(ip, memory) do
+  def do_run(memory, %{ip: ip} = state) do
     read = memory |> Enum.drop(ip) |> Enum.take(4)
-    do_run(read, ip, memory)
+    do_run(read, memory, state)
   end
 
-  def do_run([1, inpos1, inpos2, outpos], ip, memory) do
+  def do_run([1, inpos1, inpos2, outpos], memory, %{ip: ip} = state) do
     in1 = Enum.at(memory, inpos1)
     in2 = Enum.at(memory, inpos2)
     value = in1 + in2
 
     memory = List.replace_at(memory, outpos, value)
 
-    do_run(ip + 4, memory)
+    do_run(memory, %{state | ip: ip + 4})
   end
 
-  def do_run([2, inpos1, inpos2, outpos], ip, memory) do
+  def do_run([2, inpos1, inpos2, outpos], memory, %{ip: ip} = state) do
     in1 = Enum.at(memory, inpos1)
     in2 = Enum.at(memory, inpos2)
     value = in1 * in2
 
     memory = List.replace_at(memory, outpos, value)
 
-    do_run(ip + 4, memory)
+    do_run(memory, %{state | ip: ip + 4})
   end
 
-  def do_run([99 | _], _pc, memory) do
+  def do_run([99 | _], memory, _state) do
     memory
   end
 end
