@@ -25,8 +25,22 @@ defmodule Computer do
     |> List.replace_at(2, verb)
   end
 
+  def decode_op(number) do
+    digits = Integer.digits(number)
+    op = Integer.undigits(Enum.take(digits, -2))
+    mode1 = Enum.at(digits, -3, 0)
+    mode2 = Enum.at(digits, -4, 0)
+    mode3 = Enum.at(digits, -5, 0)
+
+    {op, decode_mode(mode1), decode_mode(mode2), decode_mode(mode3)}
+  end
+
+  def decode_mode(0), do: :position
+  def decode_mode(1), do: :immediate
+
   def decode(memory, ip) do
     slice = Enum.slice(memory, ip, 4)
+    op = decode_op(List.first(slice))
 
     num_params =
       case List.first(slice) do
