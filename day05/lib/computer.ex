@@ -26,15 +26,17 @@ defmodule Computer do
   end
 
   def decode(memory, ip) do
+    slice = Enum.slice(memory, ip, 4)
+
     num_params =
-      case Enum.at(memory, ip) do
+      case List.first(slice) do
         3 -> 1
         4 -> 1
         99 -> 0
         _ -> 3
       end
 
-    memory |> Enum.drop(ip) |> Enum.take(1 + num_params)
+    Enum.take(slice, 1 + num_params)
   end
 
   def do_run(memory, %{ip: ip} = state) do
