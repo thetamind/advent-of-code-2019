@@ -3,28 +3,13 @@ defmodule Computer do
   Documentation for Computer.
   """
 
-  @doc """
-  ## Examples
+  def run(memory, state \\ %{}) do
+    state =
+      state
+      |> Map.put(:ip, 0)
+      |> Map.put(:output, [])
 
-      iex> Computer.run([1,0,0,0,99])
-      [2,0,0,0,99]
-
-      iex> Computer.run([2,3,0,3,99])
-      [2,3,0,6,99]
-
-      iex> Computer.run([2,4,4,5,99,0])
-      [2,4,4,5,99,9801]
-
-      iex> Computer.run([1,1,1,4,99,5,6,0,99])
-      [30,1,1,4,2,5,6,0,99]
-
-      iex> Computer.run([1,9,10,3,2,3,11,0,99,30,40,50])
-      [3500,9,10,70,2,3,11,0,99,30,40,50]
-
-  """
-
-  def run(memory) do
-    do_run(memory, %{ip: 0})
+    do_run(memory, state)
   end
 
   def load(input) do
@@ -40,8 +25,20 @@ defmodule Computer do
     |> List.replace_at(2, verb)
   end
 
+  def decode(memory, ip) do
+    num_params =
+      case Enum.at(memory, ip) do
+        3 -> 1
+        4 -> 1
+        99 -> 0
+        _ -> 3
+      end
+
+    memory |> Enum.drop(ip) |> Enum.take(1 + num_params)
+  end
+
   def do_run(memory, %{ip: ip} = state) do
-    read = memory |> Enum.drop(ip) |> Enum.take(4)
+    read = decode(memory, ip)
     do_run(read, memory, state)
   end
 
@@ -65,7 +62,23 @@ defmodule Computer do
     do_run(memory, %{state | ip: ip + 4})
   end
 
-  def do_run([99 | _], memory, _state) do
-    memory
+  def do_run([3, address], memory, %{ip: ip, input: input} = state) do
+    {value, input} = List.pop_at(input, 0)
+
+    memory = List.replace_at(memory, address, value)
+
+    do_run(memory, %{state | ip: ip + 2, input: input})
+  end
+
+  def do_run([4, address], memory, %{ip: ip, output: output} = state) do
+    value = Enum.at(memory, address)
+
+    output = List.insert_at(output, 0, value)
+
+    do_run(memory, %{state | ip: ip + 2, output: output})
+  end
+
+  def do_run([99 | _], memory, state) do
+    Map.put(state, :memory, memory)
   end
 end
