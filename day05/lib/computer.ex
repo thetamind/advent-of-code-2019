@@ -32,7 +32,7 @@ defmodule Computer do
     mode2 = Enum.at(digits, -4, 0)
     mode3 = Enum.at(digits, -5, 0)
 
-    {op, decode_mode(mode1), decode_mode(mode2), decode_mode(mode3)}
+    {op, [decode_mode(mode1), decode_mode(mode2), decode_mode(mode3)]}
   end
 
   def decode_mode(0), do: :position
@@ -40,21 +40,24 @@ defmodule Computer do
 
   def decode(memory, ip) do
     slice = Enum.slice(memory, ip, 4)
-    op = decode_op(List.first(slice))
+    {op, modes} = decode_op(List.first(slice))
 
     num_params =
-      case List.first(slice) do
+      case op do
         3 -> 1
         4 -> 1
         99 -> 0
         _ -> 3
       end
 
-    Enum.take(slice, 1 + num_params)
+    params = Enum.slice(slice, 1, num_params)
+
+    {op, Enum.zip(modes, params)}
   end
 
   def do_run(memory, %{ip: ip} = state) do
-    read = decode(memory, ip)
+    {op, modes} = decode(memory, ip)
+    read = [op] ++ Enum.map(modes, &Kernel.elem(&1, 1))
     do_run(read, memory, state)
   end
 

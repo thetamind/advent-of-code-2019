@@ -13,7 +13,7 @@ defmodule Computer.Day05 do
       [1002,4,3,4,99]
 
       iex> Computer.decode_op(1002)
-      {2, :position, :immediate, :position}
+      {2, [:position, :immediate, :position]}
   """
 
   import Computer
