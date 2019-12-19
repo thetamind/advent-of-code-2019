@@ -55,49 +55,60 @@ defmodule Computer do
     {op, Enum.zip(modes, params)}
   end
 
-  def do_run(memory, %{ip: ip} = state) do
-    {op, modes} = decode(memory, ip)
-    read = [op] ++ Enum.map(modes, &Kernel.elem(&1, 1))
-    do_run(read, memory, state)
+  def read(memory, {mode, param}) do
+    case mode do
+      :position -> Enum.at(memory, param)
+      :immediate -> param
+    end
   end
 
-  def do_run([1, inpos1, inpos2, outpos], memory, %{ip: ip} = state) do
-    in1 = Enum.at(memory, inpos1)
-    in2 = Enum.at(memory, inpos2)
+  def write(memory, {mode, param}, value) do
+    if mode == :immediate, do: raise("Write with invalid mode: #{{mode, param}}")
+    List.replace_at(memory, param, value)
+  end
+
+  def do_run(memory, %{ip: ip} = state) do
+    {op, params} = decode(memory, ip)
+    do_run(op, params, memory, state)
+  end
+
+  def do_run(1, [inpos1, inpos2, outpos], memory, %{ip: ip} = state) do
+    in1 = read(memory, inpos1)
+    in2 = read(memory, inpos2)
     value = in1 + in2
 
-    memory = List.replace_at(memory, outpos, value)
+    memory = write(memory, outpos, value)
 
     do_run(memory, %{state | ip: ip + 4})
   end
 
-  def do_run([2, inpos1, inpos2, outpos], memory, %{ip: ip} = state) do
-    in1 = Enum.at(memory, inpos1)
-    in2 = Enum.at(memory, inpos2)
+  def do_run(2, [inpos1, inpos2, outpos], memory, %{ip: ip} = state) do
+    in1 = read(memory, inpos1)
+    in2 = read(memory, inpos2)
     value = in1 * in2
 
-    memory = List.replace_at(memory, outpos, value)
+    memory = write(memory, outpos, value)
 
     do_run(memory, %{state | ip: ip + 4})
   end
 
-  def do_run([3, address], memory, %{ip: ip, input: input} = state) do
+  def do_run(3, [address], memory, %{ip: ip, input: input} = state) do
     {value, input} = List.pop_at(input, 0)
 
-    memory = List.replace_at(memory, address, value)
+    memory = write(memory, address, value)
 
     do_run(memory, %{state | ip: ip + 2, input: input})
   end
 
-  def do_run([4, address], memory, %{ip: ip, output: output} = state) do
-    value = Enum.at(memory, address)
+  def do_run(4, [address], memory, %{ip: ip, output: output} = state) do
+    value = read(memory, address)
 
     output = List.insert_at(output, 0, value)
 
     do_run(memory, %{state | ip: ip + 2, output: output})
   end
 
-  def do_run([99 | _], memory, state) do
+  def do_run(99, [], memory, state) do
     Map.put(state, :memory, memory)
   end
 end
