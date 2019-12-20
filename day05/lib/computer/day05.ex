@@ -19,11 +19,17 @@ defmodule Computer.Day05 do
   import Computer
 
   def part1(input) do
-    input
-    |> load()
-    |> run(%{input: [1]})
-    |> Map.get(:output)
-    |> Enum.at(0)
+    result =
+      input
+      |> load()
+      |> run(%{input: [1]})
+
+    [code | rest] = result.output
+
+    case Enum.all?(rest, fn x -> x == 0 end) do
+      true -> code
+      false -> result
+    end
   end
 
   def part2(input) do
