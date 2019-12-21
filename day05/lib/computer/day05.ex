@@ -14,6 +14,15 @@ defmodule Computer.Day05 do
 
       iex> Computer.decode_op(1002)
       {2, [:position, :immediate, :position]}
+
+      # Part 2
+      iex> result = Computer.run([3,9,8,9,10,9,4,9,99,-1,8], %{input: [8]})
+      ...> result.output
+      [1]
+
+      iex> result = Computer.run([3,9,8,9,10,9,4,9,99,-1,8], %{input: [777]})
+      ...> result.output
+      [0]
   """
 
   import Computer
@@ -33,6 +42,10 @@ defmodule Computer.Day05 do
   end
 
   def part2(input) do
-    %{}
+    input
+    |> load()
+    |> run(%{input: [5]})
+    |> Map.get(:output)
+    |> Enum.at(0)
   end
 end

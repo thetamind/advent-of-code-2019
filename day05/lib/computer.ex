@@ -46,6 +46,10 @@ defmodule Computer do
       case op do
         3 -> 1
         4 -> 1
+        5 -> 2
+        6 -> 2
+        7 -> 3
+        8 -> 3
         99 -> 0
         _ -> 3
       end
@@ -106,6 +110,42 @@ defmodule Computer do
     output = List.insert_at(output, 0, value)
 
     do_run(memory, %{state | ip: ip + 2, output: output})
+  end
+
+  def do_run(5, [address, new_ip], memory, %{ip: ip} = state) do
+    ip =
+      case read(memory, address) do
+        0 -> ip + 3
+        _ -> read(memory, new_ip)
+      end
+
+    do_run(memory, %{state | ip: ip})
+  end
+
+  def do_run(6, [address, new_ip], memory, %{ip: ip} = state) do
+    ip =
+      case read(memory, address) do
+        0 -> read(memory, new_ip)
+        _ -> ip + 3
+      end
+
+    do_run(memory, %{state | ip: ip})
+  end
+
+  def do_run(7, [first, second, outpos], memory, %{ip: ip} = state) do
+    value = if read(memory, first) < read(memory, second), do: 1, else: 0
+
+    memory = write(memory, outpos, value)
+
+    do_run(memory, %{state | ip: ip + 4})
+  end
+
+  def do_run(8, [first, second, outpos], memory, %{ip: ip} = state) do
+    value = if read(memory, first) == read(memory, second), do: 1, else: 0
+
+    memory = write(memory, outpos, value)
+
+    do_run(memory, %{state | ip: ip + 4})
   end
 
   def do_run(99, [], memory, state) do
