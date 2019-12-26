@@ -16,11 +16,11 @@ defmodule Day06 do
   end
 
   defp parse_orbit("COM)" <> <<b::8>>) do
-    [:COM, String.to_atom(<<b>>)]
+    [String.to_atom(<<b>>), :COM]
   end
 
   defp parse_orbit(<<a::8, _p::8, b::8>>) do
-    [String.to_atom(<<a>>), String.to_atom(<<b>>)]
+    [String.to_atom(<<b>>), String.to_atom(<<a>>)]
   end
 
   def count(orbits) do
