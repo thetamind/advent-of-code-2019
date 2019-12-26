@@ -26,4 +26,15 @@ defmodule Day06 do
   def count(orbits) do
     Graph.num_vertices(orbits)
   end
+
+  def total_orbits(orbits) do
+    Graph.vertices(orbits)
+    |> Enum.map(fn v ->
+      case Graph.get_shortest_path(orbits, v, :COM) do
+        nil -> 0
+        path -> Enum.count(path) - 1
+      end
+    end)
+    |> Enum.sum()
+  end
 end

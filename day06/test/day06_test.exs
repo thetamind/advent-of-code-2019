@@ -2,8 +2,8 @@ defmodule Day06Test do
   use ExUnit.Case
   doctest Day06
 
-  test "load" do
-    input = ~S"""
+  def part1_example() do
+    ~S"""
     COM)B
     B)C
     C)D
@@ -16,8 +16,15 @@ defmodule Day06Test do
     J)K
     K)L
     """
+  end
 
-    orbits = Day06.load(input)
+  test "load" do
+    orbits = Day06.load(part1_example())
     assert Day06.count(orbits) == 12
+  end
+
+  test "part 1 example" do
+    orbits = Day06.load(part1_example())
+    assert Day06.total_orbits(orbits) == 42
   end
 end
