@@ -20,6 +20,6 @@ defmodule Day06.MixProject do
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
-    [{:libgraph, "~> 0.7"}]
+    [{:libgraph, github: "tinfoil/libgraph"}]
   end
 end
