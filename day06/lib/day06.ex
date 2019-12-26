@@ -11,16 +11,13 @@ defmodule Day06 do
     |> String.split("\n", trim: true)
     |> Enum.map(&parse_orbit/1)
     |> Enum.reduce(Graph.new(), fn [a, b], graph ->
-      Graph.add_edge(graph, a, b)
+      Graph.add_edge(graph, b, a)
     end)
   end
 
-  defp parse_orbit("COM)" <> <<b::8>>) do
-    [String.to_atom(<<b>>), :COM]
-  end
-
-  defp parse_orbit(<<a::8, _p::8, b::8>>) do
-    [String.to_atom(<<b>>), String.to_atom(<<a>>)]
+  defp parse_orbit(orbit) do
+    [a, b] = String.split(orbit, ")")
+    [String.to_atom(a), String.to_atom(b)]
   end
 
   def count(orbits) do
