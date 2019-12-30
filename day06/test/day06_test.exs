@@ -31,6 +31,6 @@ defmodule Day06Test do
   test "part 1 solution" do
     path = Path.expand("data/input.txt")
     orbits = Day06.load(File.read!(path))
-    assert Day06.total_orbits(orbits) == 38507
+    assert Day06.total_orbits(orbits) == 145_250
   end
 end

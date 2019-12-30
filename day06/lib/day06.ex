@@ -16,8 +16,7 @@ defmodule Day06 do
   end
 
   defp parse_orbit(orbit) do
-    [a, b] = String.split(orbit, ")")
-    [String.to_atom(a), String.to_atom(b)]
+    String.split(orbit, ")")
   end
 
   def count(orbits) do
@@ -26,12 +25,15 @@ defmodule Day06 do
 
   def total_orbits(orbits) do
     Graph.vertices(orbits)
-    |> Enum.map(fn v ->
-      case Graph.get_shortest_path(orbits, v, :COM) do
-        nil -> 0
-        path -> Enum.count(path) - 1
-      end
+    |> Enum.reduce(0, fn v, acc ->
+      count(orbits, v, acc)
     end)
-    |> Enum.sum()
+  end
+
+  defp count(orbits, v, acc) do
+    case Graph.out_neighbors(orbits, v) do
+      [] -> acc
+      [body] -> count(orbits, body, acc + 1)
+    end
   end
 end
