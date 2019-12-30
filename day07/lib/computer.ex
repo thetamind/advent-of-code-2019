@@ -97,6 +97,7 @@ defmodule Computer do
   end
 
   def do_run(3, [address], memory, %{ip: ip, input: input} = state) do
+    if input == [], do: raise("Input exhausted: #{inspect(state)} memory: #{inspect(memory)}")
     {value, input} = List.pop_at(input, 0)
 
     memory = write(memory, address, value)
