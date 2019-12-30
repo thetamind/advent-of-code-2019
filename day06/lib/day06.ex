@@ -36,4 +36,23 @@ defmodule Day06 do
       [body] -> count(orbits, body, acc + 1)
     end
   end
+
+  def transfers(orbits) do
+    my_path = Graph.get_shortest_path(orbits, "YOU", "COM")
+    santa_path = Graph.get_shortest_path(orbits, "SAN", "COM")
+    santa_lookup = MapSet.new(santa_path)
+
+    common =
+      Enum.find(my_path, fn planet ->
+        MapSet.member?(santa_lookup, planet)
+      end)
+
+    my_index = Enum.find_index(my_path, &(&1 == common))
+    santa_index = Enum.find_index(santa_path, &(&1 == common))
+
+    my_slice = Enum.split(my_path, my_index + 1) |> elem(0)
+    santa_slice = Enum.split(santa_path, santa_index + 1) |> elem(0)
+
+    Enum.count(my_slice) + Enum.count(santa_slice) - 4
+  end
 end
