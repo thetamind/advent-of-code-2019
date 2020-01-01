@@ -3,11 +3,17 @@ defmodule Computer do
   Documentation for Computer.
   """
 
-  def run(memory, state \\ %{}) do
+  defstruct ip: 0, input: [], output: []
+
+  def new() do
+    %__MODULE__{}
+  end
+
+  def run(memory, state \\ Computer.new()) do
     state =
       state
-      |> Map.put(:ip, 0)
-      |> Map.put(:output, [])
+      |> Map.put_new(:ip, 0)
+      |> Map.put_new(:output, [])
 
     do_run(memory, state)
   end
@@ -152,4 +158,14 @@ defmodule Computer do
   def do_run(99, [], memory, state) do
     Map.put(state, :memory, memory)
   end
+
+  # def add_input(state, list) when is_list(list), do: add_input(state, List.first(list))
+
+  def add_input(state, []), do: state
+
+  def add_input(state, value) when not is_list(value) do
+    Map.update!(state, :input, fn input -> [value | input] end)
+  end
+
+  def output(%{output: output}), do: output
 end

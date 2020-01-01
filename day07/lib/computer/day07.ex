@@ -2,7 +2,7 @@ defmodule Computer.Day07 do
   @moduledoc """
   Documentation for `Computer.Day07`.
 
-  ## Examples
+  ## Part 1 Examples
 
       iex> Computer.Day07.part1("3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0", [4,3,2,1,0])
       43210
@@ -12,6 +12,14 @@ defmodule Computer.Day07 do
 
       iex> Computer.Day07.part1("3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0", [1,0,4,3,2])
       65210
+
+  ## Part 2 Examples
+
+      iex> Computer.Day07.part2("3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5", [9,8,7,6,5])
+      139629729
+
+      iex> Computer.Day07.part2("3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,-5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10", [9,7,8,5,6])
+      18216
 
   """
 
@@ -33,6 +41,45 @@ defmodule Computer.Day07 do
       result.output
     end)
     |> List.first()
+  end
+
+  def part2(input, phases) do
+    program = load(input)
+
+    state =
+      Computer.new()
+      |> Computer.add_input(0)
+
+    phases
+    |> permutations()
+    |> Enum.map(fn phases -> feedback(program, phases, state) end)
+    |> Enum.max()
+  end
+
+  # Amp A B C D E
+  # phases A B C D E
+  # reduce A -> E
+  # Take E output and loop into A
+  # When halt????, E output is answer
+
+  def feedback(program, phases, state) do
+    Enum.reduce(phases, state, fn phase, state ->
+      state =
+        case state.output do
+          [] ->
+            Computer.add_input(state, phase)
+
+          [value] ->
+            Computer.add_input(state, value)
+            |> Map.put(:output, [])
+        end
+
+      Computer.run(program, state)
+    end)
+    |> Computer.output()
+    |> List.first()
+
+    # List.first(state.output)
   end
 
   def permutations([]), do: [[]]
