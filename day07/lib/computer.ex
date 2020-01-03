@@ -96,7 +96,7 @@ defmodule Computer do
 
   def do_run(memory, %{ip: ip} = state) do
     {op, params} = decode(memory, ip)
-    # IO.inspect("#{inspect(op)} #{inspect(params)} #{inspect(state)}")
+    # IO.puts("#{inspect(op)} #{inspect(params)} #{inspect(state, charlists: :as_lists)}")
     # Logger.debug("#{inspect(op)} #{inspect(params)} #{inspect(state)}")
     do_run(op, params, memory, state)
   end
@@ -122,12 +122,17 @@ defmodule Computer do
   end
 
   def do_run(3, [address], memory, %{ip: ip, input: input} = state) do
-    if input == [], do: raise("Input exhausted: #{inspect(state)} memory: #{inspect(memory)}")
-    {value, input} = List.pop_at(input, 0)
+    # if input == [], do: raise("Input exhausted: #{inspect(state)} memory: #{inspect(memory)}")
+    if input == [] do
+      state = %{state | state: :wait_input}
+      Map.put(state, :memory, memory)
+    else
+      {value, input} = List.pop_at(input, 0)
 
-    memory = write(memory, address, value)
+      memory = write(memory, address, value)
 
-    do_run(memory, %{state | ip: ip + 2, input: input})
+      do_run(memory, %{state | ip: ip + 2, input: input})
+    end
   end
 
   def do_run(4, [address], memory, %{ip: ip, output: output} = state) do
@@ -185,7 +190,7 @@ defmodule Computer do
 
   def add_input(state, value) when not is_list(value) do
     Map.update!(state, :input, fn input -> List.insert_at(input, -1, value) end)
-    |> IO.inspect(label: "add_input")
+    |> IO.inspect(label: "add_input", charlists: :as_lists)
   end
 
   def output(%{output: output}), do: output

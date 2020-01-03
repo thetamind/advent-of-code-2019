@@ -87,7 +87,7 @@ defmodule Computer.Day07 do
       amp = Computer.add_input(amp, acc)
       amp = Computer.run(program, amp)
 
-      IO.inspect(Computer.output(amp), label: "output #{amp.label}")
+      IO.inspect(Map.delete(amp, :memory), label: "output #{amp.label}", charlists: :as_lists)
       output = Computer.output(amp) |> List.first()
 
       if amp.label == "E", do: {:halt, output}, else: {[amp], output}
