@@ -3,17 +3,32 @@ defmodule Computer do
   Documentation for Computer.
   """
 
-  defstruct ip: 0, input: [], output: []
+  defstruct ip: 0, input: [], output: [], state: :virgin, label: nil
 
   def new() do
     %__MODULE__{}
   end
 
-  def run(memory, state \\ Computer.new()) do
+  def run(memory), do: run(memory, Computer.new())
+
+  def run(memory, %Computer{} = state) when is_struct(state) do
+    # state =
+    #   state
+    #   |> Map.put_new(:ip, 0)
+    #   |> Map.put_new(:output, [])
+
+    do_run(memory, state)
+  end
+
+  def run(memory, init_state) when is_map(init_state) do
+    # state =
+    #   Computer.new()
+    #   |> Map.merge(init_state)
+    #   |> IO.inspect(label: "run(init_state)")
+
     state =
-      state
-      |> Map.put_new(:ip, 0)
-      |> Map.put_new(:output, [])
+      struct!(__MODULE__, init_state)
+      |> IO.inspect(label: "run(init_state)")
 
     do_run(memory, state)
   end
@@ -77,8 +92,12 @@ defmodule Computer do
     List.replace_at(memory, param, value)
   end
 
+  require Logger
+
   def do_run(memory, %{ip: ip} = state) do
     {op, params} = decode(memory, ip)
+    # IO.inspect("#{inspect(op)} #{inspect(params)} #{inspect(state)}")
+    # Logger.debug("#{inspect(op)} #{inspect(params)} #{inspect(state)}")
     do_run(op, params, memory, state)
   end
 
@@ -157,14 +176,16 @@ defmodule Computer do
 
   def do_run(99, [], memory, state) do
     Map.put(state, :memory, memory)
+    |> Map.put(:state, :halt)
   end
 
   # def add_input(state, list) when is_list(list), do: add_input(state, List.first(list))
 
-  def add_input(state, []), do: state
+  # def add_input(state, []), do: state
 
   def add_input(state, value) when not is_list(value) do
-    Map.update!(state, :input, fn input -> [value | input] end)
+    Map.update!(state, :input, fn input -> List.insert_at(input, -1, value) end)
+    |> IO.inspect(label: "add_input")
   end
 
   def output(%{output: output}), do: output

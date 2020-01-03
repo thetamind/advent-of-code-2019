@@ -46,38 +46,74 @@ defmodule Computer.Day07 do
   def part2(input, phases) do
     program = load(input)
 
-    state =
-      Computer.new()
-      |> Computer.add_input(0)
+    feedback(program, phases)
 
-    phases
-    |> permutations()
-    |> Enum.map(fn phases -> feedback(program, phases, state) end)
-    |> Enum.max()
+    # phases
+    # |> permutations()
+    # |> Enum.map(fn phases -> feedback(program, phases, state) end)
+    # |> Enum.max()
   end
 
+  # setup state
+  # phases 5 6 7 8 9
   # Amp A B C D E
-  # phases A B C D E
   # reduce A -> E
   # Take E output and loop into A
   # When halt????, E output is answer
 
-  def feedback(program, phases, state) do
-    Enum.reduce(phases, state, fn phase, state ->
-      state =
-        case state.output do
-          [] ->
-            Computer.add_input(state, phase)
+  def feedback(program, phases) do
+    label_gen = for c <- ?A..?Z, do: <<c>>
 
-          [value] ->
-            Computer.add_input(state, value)
-            |> Map.put(:output, [])
-        end
+    amps =
+      phases
+      |> Enum.zip(label_gen)
+      |> Enum.map(fn {phase, label} ->
+        Computer.new()
+        |> Map.put(:label, label)
+        |> Computer.add_input(phase)
+      end)
 
-      Computer.run(program, state)
+    # |> List.update_at(0, fn amp -> Computer.add_input(amp, 0) end)
+
+    feedback(program, amps, 0)
+  end
+
+  def feedback(program, amps, signal) do
+    # TODO: Use Enum.flat_map_reduce/3
+
+    Enum.flat_map_reduce(amps, signal, fn amp, acc ->
+      # if acc < n, do: {[x], acc + 1}, else: {:halt, acc}
+
+      amp = Computer.add_input(amp, acc)
+      amp = Computer.run(program, amp)
+
+      IO.inspect(Computer.output(amp), label: "output #{amp.label}")
+      output = Computer.output(amp) |> List.first()
+
+      if amp.label == "E", do: {:halt, output}, else: {[amp], output}
     end)
-    |> Computer.output()
-    |> List.first()
+
+    # |> Computer.output()
+    # |> List.first()
+
+    # Enum.reduce(amps, signal, fn amp, state ->
+    #   {value, output} = List.pop_at(state.output, 0)
+
+    #   state =
+    #     case value do
+    #       nil ->
+    #         Computer.add_input(state, phase)
+
+    #       value ->
+    #         Computer.add_input(state, value)
+    #     end
+
+    #   state = %{state | output: output}
+
+    #   Computer.run(program, state)
+    # end)
+    # |> Computer.output()
+    # |> List.first()
 
     # List.first(state.output)
   end
