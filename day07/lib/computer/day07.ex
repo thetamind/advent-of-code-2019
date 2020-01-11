@@ -75,7 +75,8 @@ defmodule Computer.Day07 do
 
     # |> List.update_at(0, fn amp -> Computer.add_input(amp, 0) end)
 
-    feedback(program, amps, 0)
+    {amps, signal} = feedback(program, amps, 0)
+    feedback(program, amps, signal)
   end
 
   def feedback(program, amps, signal) do
@@ -87,10 +88,11 @@ defmodule Computer.Day07 do
       amp = Computer.add_input(amp, acc)
       amp = Computer.run(program, amp)
 
-      IO.inspect(Map.delete(amp, :memory), label: "output #{amp.label}", charlists: :as_lists)
+      IO.inspect(amp, label: "output #{amp.label}", charlists: :as_lists, width: 140)
       output = Computer.output(amp) |> List.first()
 
       if amp.label == "E", do: {:halt, output}, else: {[amp], output}
+      # {[amp], output}
     end)
 
     # |> Computer.output()

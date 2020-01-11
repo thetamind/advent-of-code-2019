@@ -3,7 +3,7 @@ defmodule Computer do
   Documentation for Computer.
   """
 
-  defstruct ip: 0, input: [], output: [], state: :virgin, label: nil
+  defstruct ip: 0, input: [], output: [], state: :virgin, label: nil, memory: []
 
   def new() do
     %__MODULE__{}
@@ -17,7 +17,9 @@ defmodule Computer do
     #   |> Map.put_new(:ip, 0)
     #   |> Map.put_new(:output, [])
 
-    do_run(memory, state)
+    state = Map.put(state, :memory, memory)
+
+    do_run(state)
   end
 
   def run(memory, init_state) when is_map(init_state) do
@@ -27,10 +29,10 @@ defmodule Computer do
     #   |> IO.inspect(label: "run(init_state)")
 
     state =
-      struct!(__MODULE__, init_state)
+      struct!(__MODULE__, Map.put(init_state, :memory, memory))
       |> IO.inspect(label: "run(init_state)")
 
-    do_run(memory, state)
+    do_run(state)
   end
 
   def load(input) do
@@ -94,94 +96,94 @@ defmodule Computer do
 
   require Logger
 
-  def do_run(memory, %{ip: ip} = state) do
+  def do_run(%{memory: memory, ip: ip} = state) do
     {op, params} = decode(memory, ip)
     # IO.puts("#{inspect(op)} #{inspect(params)} #{inspect(state, charlists: :as_lists)}")
     # Logger.debug("#{inspect(op)} #{inspect(params)} #{inspect(state)}")
-    do_run(op, params, memory, state)
+    do_run(op, params, state)
   end
 
-  def do_run(1, [inpos1, inpos2, outpos], memory, %{ip: ip} = state) do
+  def do_run(1, [inpos1, inpos2, outpos], %{memory: memory, ip: ip} = state) do
     in1 = read(memory, inpos1)
     in2 = read(memory, inpos2)
     value = in1 + in2
 
     memory = write(memory, outpos, value)
 
-    do_run(memory, %{state | ip: ip + 4})
+    do_run(%{state | memory: memory, ip: ip + 4})
   end
 
-  def do_run(2, [inpos1, inpos2, outpos], memory, %{ip: ip} = state) do
+  def do_run(2, [inpos1, inpos2, outpos], %{memory: memory, ip: ip} = state) do
     in1 = read(memory, inpos1)
     in2 = read(memory, inpos2)
     value = in1 * in2
 
     memory = write(memory, outpos, value)
 
-    do_run(memory, %{state | ip: ip + 4})
+    do_run(%{state | memory: memory, ip: ip + 4})
   end
 
-  def do_run(3, [address], memory, %{ip: ip, input: input} = state) do
+  def do_run(3, [address], %{memory: memory, ip: ip, input: input} = state) do
     # if input == [], do: raise("Input exhausted: #{inspect(state)} memory: #{inspect(memory)}")
     if input == [] do
-      state = %{state | state: :wait_input}
-      Map.put(state, :memory, memory)
+      %{state | state: :wait_input}
     else
       {value, input} = List.pop_at(input, 0)
 
       memory = write(memory, address, value)
 
-      do_run(memory, %{state | ip: ip + 2, input: input})
+      do_run(%{state | memory: memory, ip: ip + 2, input: input})
     end
   end
 
-  def do_run(4, [address], memory, %{ip: ip, output: output} = state) do
+  def do_run(4, [address], %{memory: memory, ip: ip, output: output} = state) do
     value = read(memory, address)
 
     output = List.insert_at(output, 0, value)
 
-    do_run(memory, %{state | ip: ip + 2, output: output})
+    do_run(%{state | memory: memory, ip: ip + 2, output: output})
   end
 
-  def do_run(5, [address, new_ip], memory, %{ip: ip} = state) do
+  def do_run(5, [address, new_ip], %{memory: memory, ip: ip} = state) do
     ip =
       case read(memory, address) do
         0 -> ip + 3
         _ -> read(memory, new_ip)
       end
 
-    do_run(memory, %{state | ip: ip})
+    do_run(%{state | memory: memory, ip: ip})
   end
 
-  def do_run(6, [address, new_ip], memory, %{ip: ip} = state) do
+  def do_run(6, [address, new_ip], %{memory: memory, ip: ip} = state) do
     ip =
       case read(memory, address) do
         0 -> read(memory, new_ip)
         _ -> ip + 3
       end
 
-    do_run(memory, %{state | ip: ip})
+    do_run(%{state | memory: memory, ip: ip})
   end
 
-  def do_run(7, [first, second, outpos], memory, %{ip: ip} = state) do
+  def do_run(7, [first, second, outpos], %{memory: memory, ip: ip} = state) do
     value = if read(memory, first) < read(memory, second), do: 1, else: 0
 
     memory = write(memory, outpos, value)
 
-    do_run(memory, %{state | ip: ip + 4})
+    do_run(%{state | memory: memory, ip: ip + 4})
   end
 
-  def do_run(8, [first, second, outpos], memory, %{ip: ip} = state) do
+  def do_run(8, [first, second, outpos], %{memory: memory, ip: ip} = state) do
     value = if read(memory, first) == read(memory, second), do: 1, else: 0
 
     memory = write(memory, outpos, value)
 
-    do_run(memory, %{state | ip: ip + 4})
+    do_run(%{state | memory: memory, ip: ip + 4})
   end
 
-  def do_run(99, [], memory, state) do
-    Map.put(state, :memory, memory)
-    |> Map.put(:state, :halt)
+  def do_run(99, [], state) do
+    IO.puts("[[[[99]]]] #{inspect(state, charlists: :as_lists)}")
+
+    Map.put(state, :state, :halt)
   end
 
   # def add_input(state, list) when is_list(list), do: add_input(state, List.first(list))
