@@ -26,8 +26,9 @@ defmodule Computer.Day07Test do
     assert 140_965 = Computer.Day07.thrust(program, phases, [0])
   end
 
+  @tag :wip
   test "part 2 solution" do
     input = File.read!("data/day07.txt")
-    assert Computer.Day07.part2(input, [5, 6, 7, 8, 9]) > 42_514_168
+    assert Computer.Day07.part2(input, [5, 6, 7, 8, 9]) == 58_285_150
   end
 end

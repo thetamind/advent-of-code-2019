@@ -46,9 +46,13 @@ defmodule Computer.Day07 do
   def part2(input, phases) do
     program = load(input)
 
-    amps = make_amps(program, phases)
-
-    feedback(amps, 0)
+    phases
+    |> permutations()
+    |> Enum.map(fn phases ->
+      make_amps(program, phases)
+      |> feedback(0)
+    end)
+    |> Enum.max()
   end
 
   # setup state
