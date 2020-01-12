@@ -46,12 +46,10 @@ defmodule Computer.Day07 do
   def part2(input, phases) do
     program = load(input)
 
-    feedback(program, phases)
+    amps = make_amps(program, phases)
 
-    # phases
-    # |> permutations()
-    # |> Enum.map(fn phases -> feedback(program, phases, state) end)
-    # |> Enum.max()
+    {amps, signal} = feedback(amps, 0)
+    feedback(amps, signal)
   end
 
   # setup state
@@ -61,38 +59,35 @@ defmodule Computer.Day07 do
   # Take E output and loop into A
   # When halt????, E output is answer
 
-  def feedback(program, phases) do
+  @spec make_amps([integer], [integer]) :: [Computer.t()]
+  def make_amps(program, phases) do
     label_gen = for c <- ?A..?Z, do: <<c>>
 
-    amps =
-      phases
-      |> Enum.zip(label_gen)
-      |> Enum.map(fn {phase, label} ->
-        Computer.new()
-        |> Map.put(:label, label)
-        |> Computer.add_input(phase)
-      end)
-
-    # |> List.update_at(0, fn amp -> Computer.add_input(amp, 0) end)
-
-    {amps, signal} = feedback(program, amps, 0)
-    feedback(program, amps, signal)
+    phases
+    |> Enum.zip(label_gen)
+    |> Enum.map(fn {phase, label} ->
+      Computer.new()
+      |> Map.put(:memory, program)
+      |> Map.put(:label, label)
+      |> Computer.add_input(phase)
+    end)
   end
 
-  def feedback(program, amps, signal) do
+  @spec feedback([Computer.t()], integer) :: {[Computer.t()], integer}
+  def feedback(amps, signal) do
     # TODO: Use Enum.flat_map_reduce/3
 
     Enum.flat_map_reduce(amps, signal, fn amp, acc ->
-      # if acc < n, do: {[x], acc + 1}, else: {:halt, acc}
+      amp =
+        amp
+        |> Computer.add_input(acc)
+        |> Computer.run()
 
-      amp = Computer.add_input(amp, acc)
-      amp = Computer.run(program, amp)
-
-      IO.inspect(amp, label: "output #{amp.label}", charlists: :as_lists, width: 140)
+      # IO.inspect(amp, label: "output #{amp.label}", charlists: :as_lists, width: 140)
       output = Computer.output(amp) |> List.first()
 
-      if amp.label == "E", do: {:halt, output}, else: {[amp], output}
-      # {[amp], output}
+      # if amp.label == "E", do: {:halt, output}, else: {[amp], output}
+      {[amp], output}
     end)
 
     # |> Computer.output()

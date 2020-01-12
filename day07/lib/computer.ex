@@ -9,28 +9,21 @@ defmodule Computer do
     %__MODULE__{}
   end
 
-  def run(memory), do: run(memory, Computer.new())
+  def new(program, init_state) when is_map(init_state) do
+    struct!(__MODULE__, Map.put(init_state, :memory, program))
+  end
+
+  def run(%Computer{} = state), do: do_run(state)
+  def run(memory) when is_list(memory), do: run(memory, Computer.new())
 
   def run(memory, %Computer{} = state) when is_struct(state) do
-    # state =
-    #   state
-    #   |> Map.put_new(:ip, 0)
-    #   |> Map.put_new(:output, [])
-
     state = Map.put(state, :memory, memory)
 
     do_run(state)
   end
 
   def run(memory, init_state) when is_map(init_state) do
-    # state =
-    #   Computer.new()
-    #   |> Map.merge(init_state)
-    #   |> IO.inspect(label: "run(init_state)")
-
-    state =
-      struct!(__MODULE__, Map.put(init_state, :memory, memory))
-      |> IO.inspect(label: "run(init_state)")
+    state = struct!(__MODULE__, Map.put(init_state, :memory, memory))
 
     do_run(state)
   end
