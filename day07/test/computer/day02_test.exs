@@ -9,6 +9,7 @@ defmodule Computer.Day02Test do
   end
 
   @tag :slow
+  @tag timeout: 5_000
   test "part 2 solution" do
     input = File.read!("data/day02.txt")
     assert Computer.Day02.part2(input) == 5936
