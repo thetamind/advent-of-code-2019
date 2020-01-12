@@ -48,8 +48,7 @@ defmodule Computer.Day07 do
 
     amps = make_amps(program, phases)
 
-    {amps, signal} = feedback(amps, 0)
-    feedback(amps, signal)
+    feedback(amps, 0)
   end
 
   # setup state
@@ -75,44 +74,23 @@ defmodule Computer.Day07 do
 
   @spec feedback([Computer.t()], integer) :: {[Computer.t()], integer}
   def feedback(amps, signal) do
-    # TODO: Use Enum.flat_map_reduce/3
+    {amps, signal} =
+      Enum.flat_map_reduce(amps, signal, fn amp, acc ->
+        amp =
+          amp
+          |> Computer.add_input(acc)
+          |> Computer.run()
 
-    Enum.flat_map_reduce(amps, signal, fn amp, acc ->
-      amp =
-        amp
-        |> Computer.add_input(acc)
-        |> Computer.run()
+        output = Computer.output(amp) |> List.first()
 
-      # IO.inspect(amp, label: "output #{amp.label}", charlists: :as_lists, width: 140)
-      output = Computer.output(amp) |> List.first()
+        {[amp], output}
+      end)
 
-      # if amp.label == "E", do: {:halt, output}, else: {[amp], output}
-      {[amp], output}
-    end)
-
-    # |> Computer.output()
-    # |> List.first()
-
-    # Enum.reduce(amps, signal, fn amp, state ->
-    #   {value, output} = List.pop_at(state.output, 0)
-
-    #   state =
-    #     case value do
-    #       nil ->
-    #         Computer.add_input(state, phase)
-
-    #       value ->
-    #         Computer.add_input(state, value)
-    #     end
-
-    #   state = %{state | output: output}
-
-    #   Computer.run(program, state)
-    # end)
-    # |> Computer.output()
-    # |> List.first()
-
-    # List.first(state.output)
+    if Enum.all?(amps, &Computer.halted?/1) do
+      signal
+    else
+      feedback(amps, signal)
+    end
   end
 
   def permutations([]), do: [[]]

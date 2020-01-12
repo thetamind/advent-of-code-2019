@@ -28,6 +28,6 @@ defmodule Computer.Day07Test do
 
   test "part 2 solution" do
     input = File.read!("data/day07.txt")
-    assert Computer.Day07.part2(input, [5, 6, 7, 8, 9]) == -1
+    assert Computer.Day07.part2(input, [5, 6, 7, 8, 9]) > 42_514_168
   end
 end

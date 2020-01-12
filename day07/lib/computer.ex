@@ -174,7 +174,7 @@ defmodule Computer do
   end
 
   def do_run(99, [], state) do
-    IO.puts("[[[[99]]]] #{inspect(state, charlists: :as_lists)}")
+    # IO.puts("[[[[99]]]] #{inspect(state, charlists: :as_lists)}")
 
     Map.put(state, :state, :halt)
   end
@@ -185,8 +185,10 @@ defmodule Computer do
 
   def add_input(state, value) when not is_list(value) do
     Map.update!(state, :input, fn input -> List.insert_at(input, -1, value) end)
-    |> IO.inspect(label: "add_input", charlists: :as_lists)
+    # |> IO.inspect(label: "add_input", charlists: :as_lists, width: 140)
   end
 
   def output(%{output: output}), do: output
+
+  def halted?(%{state: state}), do: state == :halt
 end
