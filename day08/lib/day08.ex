@@ -36,6 +36,8 @@ defmodule Day08 do
     Map.get(counts, a) * Map.get(counts, b)
   end
 
+  @black 0
+  @white 1
   @transparent 2
 
   def part2(data, width: width, height: height) do
@@ -58,4 +60,14 @@ defmodule Day08 do
     end)
     |> Enum.chunk_every(width)
   end
+
+  def render(image) do
+    image
+    |> Enum.map(fn row -> Enum.map(row, &to_ascii/1) end)
+    |> Enum.join("\n")
+  end
+
+  def to_ascii(@black), do: "."
+  def to_ascii(@white), do: "#"
+  def to_ascii(@transparent), do: " "
 end

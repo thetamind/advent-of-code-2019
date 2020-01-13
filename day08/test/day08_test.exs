@@ -33,7 +33,10 @@ defmodule Day08Test do
   test "part 2 solution" do
     input = File.read!("data/input.txt") |> String.trim_trailing("\n")
 
+    IO.puts("\n")
+
     Day08.part2(input, width: 25, height: 6)
-    |> IO.inspect()
+    |> Day08.render()
+    |> IO.puts()
   end
 end
