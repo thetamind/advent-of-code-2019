@@ -13,8 +13,8 @@ defmodule Day08 do
 
   def decode(data, width: width, height: height) do
     data
-    |> String.to_integer()
-    |> Integer.digits()
+    |> String.graphemes()
+    |> Enum.map(&String.to_integer/1)
     |> Enum.chunk_every(width * height)
     |> Enum.map(&Enum.chunk_every(&1, width))
   end
@@ -34,5 +34,28 @@ defmodule Day08 do
 
   def checksum(counts, a, b) do
     Map.get(counts, a) * Map.get(counts, b)
+  end
+
+  @transparent 2
+
+  def part2(data, width: width, height: height) do
+    data
+    |> decode(width: width, height: height)
+    |> compose(width: width)
+  end
+
+  def compose(layers, width: width) do
+    layers
+    |> Enum.map(&List.flatten/1)
+    |> List.zip()
+    |> Enum.map(fn pixels ->
+      Enum.reduce_while(Tuple.to_list(pixels), @transparent, fn pixel, prev ->
+        case pixel do
+          ^prev -> {:cont, prev}
+          pixel -> {:halt, pixel}
+        end
+      end)
+    end)
+    |> Enum.chunk_every(width)
   end
 end
