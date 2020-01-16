@@ -87,9 +87,12 @@ defmodule Computer do
     end
   end
 
-  def write(memory, {mode, param}, value) do
-    if mode == :immediate, do: raise("Write with invalid mode: #{{mode, param}}")
-    List.replace_at(memory, param, value)
+  def write(memory, base, {mode, param}, value) do
+    case mode do
+      :position -> List.replace_at(memory, param, value)
+      :immediate -> raise("Write with invalid mode: #{inspect({mode, param})}")
+      :relative -> List.replace_at(memory, base + param, value)
+    end
   end
 
   require Logger
@@ -104,7 +107,7 @@ defmodule Computer do
     in2 = read(memory, base, inpos2)
     value = in1 + in2
 
-    memory = write(memory, outpos, value)
+    memory = write(memory, base, outpos, value)
 
     do_run(%{state | memory: memory, ip: ip + 4})
   end
@@ -114,18 +117,18 @@ defmodule Computer do
     in2 = read(memory, base, inpos2)
     value = in1 * in2
 
-    memory = write(memory, outpos, value)
+    memory = write(memory, base, outpos, value)
 
     do_run(%{state | memory: memory, ip: ip + 4})
   end
 
-  def do_run(3, [address], %{memory: memory, ip: ip, input: input} = state) do
+  def do_run(3, [address], %{memory: memory, base: base, ip: ip, input: input} = state) do
     if input == [] do
       %{state | state: :wait_input}
     else
       {value, input} = List.pop_at(input, 0)
 
-      memory = write(memory, address, value)
+      memory = write(memory, base, address, value)
 
       do_run(%{state | memory: memory, ip: ip + 2, input: input})
     end
@@ -162,7 +165,7 @@ defmodule Computer do
   def do_run(7, [first, second, outpos], %{memory: memory, base: base, ip: ip} = state) do
     value = if read(memory, base, first) < read(memory, base, second), do: 1, else: 0
 
-    memory = write(memory, outpos, value)
+    memory = write(memory, base, outpos, value)
 
     do_run(%{state | memory: memory, ip: ip + 4})
   end
@@ -170,7 +173,7 @@ defmodule Computer do
   def do_run(8, [first, second, outpos], %{memory: memory, base: base, ip: ip} = state) do
     value = if read(memory, base, first) == read(memory, base, second), do: 1, else: 0
 
-    memory = write(memory, outpos, value)
+    memory = write(memory, base, outpos, value)
 
     do_run(%{state | memory: memory, ip: ip + 4})
   end
