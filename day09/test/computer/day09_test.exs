@@ -5,10 +5,10 @@ defmodule Computer.Day09Test do
 
   test "part 1 solution" do
     input = File.read!("data/day09.txt")
-    assert Computer.Day09.part1(input) == [-1]
+    assert Computer.Day09.part1(input) == [2_351_176_124]
   end
 
-  test "write with upper memory area supper " do
+  test "write with upper memory area support" do
     assert {[0, 1, 99, 3], _uma} = Computer.write([0, 1, 2, 3], %{}, 0, {:position, 2}, 99)
 
     assert {[0, 1, 2, 3], %{4 => 99}} = Computer.write([0, 1, 2, 3], %{}, 0, {:position, 4}, 99)

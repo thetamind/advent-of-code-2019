@@ -24,7 +24,6 @@ defmodule Computer.Day09 do
     input
     |> load()
     |> Computer.run(%{input: [1]})
-    |> IO.inspect(width: 160, limit: 300)
     |> Computer.output()
   end
 end
