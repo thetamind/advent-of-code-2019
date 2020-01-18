@@ -26,4 +26,11 @@ defmodule Computer.Day09 do
     |> Computer.run(%{input: [1]})
     |> Computer.output()
   end
+
+  def part2(input) do
+    input
+    |> load()
+    |> Computer.run(%{input: [2]})
+    |> Computer.output()
+  end
 end

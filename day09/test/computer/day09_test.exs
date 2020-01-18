@@ -8,6 +8,13 @@ defmodule Computer.Day09Test do
     assert Computer.Day09.part1(input) == [2_351_176_124]
   end
 
+  @tag timeout: 20_000
+  @tag :slow
+  test "part 2 solution" do
+    input = File.read!("data/day09.txt")
+    assert Computer.Day09.part2(input) == [73110]
+  end
+
   test "write with upper memory area support" do
     assert {[0, 1, 99, 3], _uma} = Computer.write([0, 1, 2, 3], %{}, 0, {:position, 2}, 99)
 
