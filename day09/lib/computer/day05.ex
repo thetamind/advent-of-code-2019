@@ -33,7 +33,7 @@ defmodule Computer.Day05 do
       |> load()
       |> run(%{input: [1]})
 
-    [code | rest] = result.output
+    [code | rest] = Enum.reverse(result.output)
 
     case Enum.all?(rest, fn x -> x == 0 end) do
       true -> code

@@ -85,7 +85,7 @@ defmodule Computer.Day07 do
           |> Computer.add_input(acc)
           |> Computer.run()
 
-        output = Computer.output(amp) |> List.first()
+        output = Computer.output(amp) |> List.last()
 
         {[amp], output}
       end)

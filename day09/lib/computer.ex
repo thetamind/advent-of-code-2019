@@ -162,7 +162,7 @@ defmodule Computer do
       ) do
     value = read(memory, uma, base, address)
 
-    output = List.insert_at(output, 0, value)
+    output = List.insert_at(output, -1, value)
 
     do_run(%{state | memory: memory, ip: ip + 2, output: output})
   end
