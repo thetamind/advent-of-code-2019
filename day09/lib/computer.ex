@@ -203,8 +203,10 @@ defmodule Computer do
     do_run(%{state | memory: memory, uma: uma, ip: ip + 4})
   end
 
-  def do_run(9, [{_mode, offset}], %{base: base, ip: ip} = state) do
-    do_run(%{state | base: base + offset, ip: ip + 2})
+  def do_run(9, [param], %{base: base, ip: ip} = state) do
+    value = read(state, param)
+
+    do_run(%{state | base: base + value, ip: ip + 2})
   end
 
   def do_run(99, [], state) do
