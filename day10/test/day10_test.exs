@@ -54,4 +54,19 @@ defmodule Day10Test do
     assert Day10.Map.visible_count(map, {1, 0}) == 7
     assert Day10.Map.visible_count(map, {4, 2}) == 5
   end
+
+  test "visible?" do
+    input = ~S"""
+    .#..#
+    .....
+    #####
+    ....#
+    ...##
+    """
+
+    map = Day10.load(input)
+
+    assert Day10.Map.visible?(map, {3, 4}, {2, 2})
+    refute Day10.Map.visible?(map, {3, 4}, {1, 0})
+  end
 end

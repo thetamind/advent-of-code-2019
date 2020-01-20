@@ -48,6 +48,29 @@ defmodule Day10.Map do
     |> Enum.count()
   end
 
+  @spec visible?(MapSet.t(), {integer, integer}, {integer, integer}) :: boolean
+  def visible?(asteroids, source, target) do
+    slopes =
+      Enum.reduce(asteroids, %{}, fn element, acc ->
+        case slope(source, element) do
+          :identity -> acc
+          slope -> Map.update(acc, slope, [element], fn xs -> [element | xs] end)
+        end
+      end)
+
+    sorted_slopes =
+      Map.new(slopes, fn {key, elements} ->
+        sorted_elements = Enum.sort_by(elements, &manhattan(source, &1), :asc)
+        {key, sorted_elements}
+      end)
+
+    target_slope = slope(source, target)
+    asteroids_along_slope = Map.get(sorted_slopes, target_slope)
+    index = Enum.find_index(asteroids_along_slope, fn e -> e == target end)
+
+    index == 0
+  end
+
   @spec slope({number, number}, {number, number}) :: :identity | :up | :down | float
   def slope({x1, y1}, {x2, y2}) when x1 == x2 and y1 == y2, do: :identity
 
@@ -59,5 +82,9 @@ defmodule Day10.Map do
       0 -> if rise > 0, do: :up, else: :down
       run -> rise / run
     end
+  end
+
+  def manhattan({x1, y1}, {x2, y2}) do
+    abs(x1 - x2) + abs(y1 - y2)
   end
 end
