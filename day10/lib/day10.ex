@@ -23,6 +23,12 @@ defmodule Day10 do
     |> parse()
     |> Day10.Map.new()
   end
+
+  def best_location(asteroids) do
+    asteroids
+    |> Map.new(fn asteroid -> {asteroid, Day10.Map.visible_count(asteroids, asteroid)} end)
+    |> Enum.max_by(fn {_asteroid, count} -> count end)
+  end
 end
 
 defmodule Day10.Map do
@@ -64,6 +70,7 @@ defmodule Day10.Map do
         {key, sorted_elements}
       end)
 
+    # Closest asteroid along slope will be visible, blocking view of others
     target_slope = slope(source, target)
     asteroids_along_slope = Map.get(sorted_slopes, target_slope)
     index = Enum.find_index(asteroids_along_slope, fn e -> e == target end)

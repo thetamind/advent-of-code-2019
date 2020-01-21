@@ -69,4 +69,18 @@ defmodule Day10Test do
     assert Day10.Map.visible?(map, {3, 4}, {2, 2})
     refute Day10.Map.visible?(map, {3, 4}, {1, 0})
   end
+
+  test "best_location" do
+    input = ~S"""
+    .#..#
+    .....
+    #####
+    ....#
+    ...##
+    """
+
+    map = Day10.load(input)
+
+    assert Day10.best_location(map) == {{3, 4}, 8}
+  end
 end
