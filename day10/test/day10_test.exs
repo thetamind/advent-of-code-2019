@@ -3,16 +3,59 @@ defmodule Day10Test do
 
   doctest Day10
 
-  test "parse" do
-    input = ~S"""
-    .#..#
-    .....
-    #####
-    ....#
-    ...##
-    """
+  import Day10
 
-    asteroids = Day10.parse(input)
+  @small_example ~S"""
+  .#..#
+  .....
+  #####
+  ....#
+  ...##
+  """
+
+  @example1 ~S"""
+  ......#.#.
+  #..#.#....
+  ..#######.
+  .#.#.###..
+  .#..#.....
+  ..#....#.#
+  #..#....#.
+  .##.#..###
+  ##...#..#.
+  .#....####
+  """
+
+  @example2 ~S"""
+  #.#...#.#.
+  .###....#.
+  .#....#...
+  ##.#.#.#.#
+  ....#.#.#.
+  .##..###.#
+  ..#...##..
+  ..##....##
+  ......#...
+  .####.###.
+  """
+
+  @example3 ~S"""
+  .#..#..###
+  ####.###.#
+  ....###.#.
+  ..###.##.#
+  ##.##.#.#.
+  ....###..#
+  ..#.#..#.#
+  #..#.#.###
+  .##...##.#
+  .....#.#..
+  """
+
+  @example4 File.read!("data/example4.txt")
+
+  test "parse" do
+    asteroids = Day10.parse(@small_example)
 
     assert Enum.member?(asteroids, {1, 0})
     assert Enum.member?(asteroids, {4, 0})
@@ -25,30 +68,14 @@ defmodule Day10Test do
   end
 
   test "load" do
-    input = ~S"""
-    .#..#
-    .....
-    #####
-    ....#
-    ...##
-    """
-
-    map = Day10.load(input)
+    map = Day10.load(@small_example)
 
     assert Day10.Map.member?(map, 3, 4)
     refute Day10.Map.member?(map, 0, 0)
   end
 
   test "visible_count" do
-    input = ~S"""
-    .#..#
-    .....
-    #####
-    ....#
-    ...##
-    """
-
-    map = Day10.load(input)
+    map = Day10.load(@small_example)
 
     assert Day10.Map.visible_count(map, {3, 4}) == 8
     assert Day10.Map.visible_count(map, {1, 0}) == 7
@@ -56,31 +83,33 @@ defmodule Day10Test do
   end
 
   test "visible?" do
-    input = ~S"""
-    .#..#
-    .....
-    #####
-    ....#
-    ...##
-    """
-
-    map = Day10.load(input)
+    map = Day10.load(@small_example)
 
     assert Day10.Map.visible?(map, {3, 4}, {2, 2})
     refute Day10.Map.visible?(map, {3, 4}, {1, 0})
   end
 
-  test "best_location" do
-    input = ~S"""
-    .#..#
-    .....
-    #####
-    ....#
-    ...##
-    """
+  describe "best_location/1" do
+    test "small example" do
+      map = Day10.load(@small_example)
 
-    map = Day10.load(input)
+      assert Day10.best_location(map) == {{3, 4}, 8}
+    end
 
-    assert Day10.best_location(map) == {{3, 4}, 8}
+    test "example 1" do
+      assert load(@example1) |> best_location() == {{5, 8}, 33}
+    end
+
+    test "example 2" do
+      assert load(@example2) |> best_location() == {{1, 2}, 35}
+    end
+
+    test "example 3" do
+      assert load(@example3) |> best_location() == {{6, 3}, 41}
+    end
+
+    test "example 4" do
+      assert load(@example4) |> best_location() == {{11, 13}, 210}
+    end
   end
 end
