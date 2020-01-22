@@ -5,6 +5,10 @@ defmodule Day10Test do
 
   import Day10
 
+  test "part 1 solution" do
+    assert part1(File.read!("data/input.txt")) == {{17, 22}, 276}
+  end
+
   @small_example ~S"""
   .#..#
   .....

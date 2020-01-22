@@ -1,6 +1,12 @@
 defmodule Day10 do
   @moduledoc false
 
+  def part1(input) do
+    input
+    |> load()
+    |> best_location()
+  end
+
   def parse(string) do
     string
     |> String.split("\n")
