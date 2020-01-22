@@ -48,33 +48,14 @@ defmodule Day10.Map do
 
   @spec visible_count(MapSet.t(), {integer, integer}) :: non_neg_integer
   def visible_count(asteroids, source) do
-    slopes =
-      Enum.reduce(asteroids, %{}, fn element, acc ->
-        case slope_with_quad(source, element) do
-          :identity -> acc
-          slope -> Map.update(acc, slope, [element], fn xs -> [element | xs] end)
-        end
-      end)
-
-    Map.keys(slopes)
+    slopes(asteroids, source)
+    |> Map.keys()
     |> Enum.count()
   end
 
   @spec visible?(MapSet.t(), {integer, integer}, {integer, integer}) :: boolean
   def visible?(asteroids, source, target) do
-    slopes =
-      Enum.reduce(asteroids, %{}, fn element, acc ->
-        case slope_with_quad(source, element) do
-          :identity -> acc
-          slope -> Map.update(acc, slope, [element], fn xs -> [element | xs] end)
-        end
-      end)
-
-    sorted_slopes =
-      Map.new(slopes, fn {key, elements} ->
-        sorted_elements = Enum.sort_by(elements, &manhattan(source, &1), :asc)
-        {key, sorted_elements}
-      end)
+    sorted_slopes = sorted_slopes(asteroids, source)
 
     # Closest asteroid along slope will be visible, blocking view of others
     target_slope = slope_with_quad(source, target)
@@ -82,6 +63,23 @@ defmodule Day10.Map do
     index = Enum.find_index(asteroids_along_slope, fn e -> e == target end)
 
     index == 0
+  end
+
+  def slopes(asteroids, source) do
+    Enum.reduce(asteroids, %{}, fn element, acc ->
+      case slope_with_quad(source, element) do
+        :identity -> acc
+        slope -> Map.update(acc, slope, [element], fn xs -> [element | xs] end)
+      end
+    end)
+  end
+
+  def sorted_slopes(asteroids, source) do
+    slopes(asteroids, source)
+    |> Map.new(fn {key, elements} ->
+      sorted_elements = Enum.sort_by(elements, &manhattan(source, &1), :asc)
+      {key, sorted_elements}
+    end)
   end
 
   def slope_with_quad({x1, y1}, {x2, y2}) when x1 == x2 and y1 == y2, do: :identity
