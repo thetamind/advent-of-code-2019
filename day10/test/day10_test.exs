@@ -112,4 +112,33 @@ defmodule Day10Test do
       assert load(@example4) |> best_location() == {{11, 13}, 210}
     end
   end
+
+  describe "same slope in different quadrant" do
+    setup :quad_map
+
+    test "visible?", %{quad_map: map} do
+      assert Day10.Map.visible?(map, {2, 2}, {1, 1})
+      assert Day10.Map.visible?(map, {2, 2}, {3, 3})
+      refute Day10.Map.visible?(map, {2, 2}, {0, 0})
+      refute Day10.Map.visible?(map, {2, 2}, {4, 4})
+    end
+
+    test "visible_count", %{quad_map: map} do
+      assert Day10.Map.visible_count(map, {2, 2}) == 4
+    end
+  end
+
+  defp quad_map(_context) do
+    map =
+      ~S"""
+      #...#
+      .#.#.
+      ..#..
+      .#.#.
+      #...#
+      """
+      |> load()
+
+    [quad_map: map]
+  end
 end
