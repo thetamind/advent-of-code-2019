@@ -7,6 +7,29 @@ defmodule Day10 do
     |> best_location()
   end
 
+  def part2(input, station) do
+    input
+    |> load()
+    |> giant_rotating_laser(station)
+    |> IO.inspect(width: 140, limit: 20)
+    |> Enum.at(200)
+  end
+
+  def giant_rotating_laser(asteroids, source) do
+    Day10.Map.sorted_slopes(asteroids, source)
+    |> Map.to_list()
+    |> Enum.map(fn {key, points} -> {key, List.first(points)} end)
+    |> Enum.sort_by(fn {{_quad, _slope}, value} ->
+      {dx, dy} = vector(source, value)
+      :math.atan2(dy, dx)
+    end)
+    |> IO.inspect()
+  end
+
+  defp vector({x1, y1}, {x2, y2}) do
+    {x2 - x1, y2 - y1}
+  end
+
   def parse(string) do
     string
     |> String.split("\n")
@@ -18,6 +41,7 @@ defmodule Day10 do
       |> Enum.reduce([], fn {char, x}, acc ->
         case char do
           "#" -> [{x, y} | acc]
+          "X" -> [{x, y} | acc]
           "." -> acc
         end
       end)
@@ -76,6 +100,8 @@ defmodule Day10.Map do
 
   def sorted_slopes(asteroids, source) do
     slopes(asteroids, source)
+    |> Map.to_list()
+    |> Enum.sort_by(fn {{quad, _slope}, _value} -> quad end)
     |> Map.new(fn {key, elements} ->
       sorted_elements = Enum.sort_by(elements, &manhattan(source, &1), :asc)
       {key, sorted_elements}

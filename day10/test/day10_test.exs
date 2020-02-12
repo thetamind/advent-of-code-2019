@@ -9,6 +9,10 @@ defmodule Day10Test do
     assert part1(File.read!("data/input.txt")) == {{17, 22}, 276}
   end
 
+  test "part 2 solution" do
+    assert part2(File.read!("data/input.txt"), {17, 22}) == -1
+  end
+
   @small_example ~S"""
   .#..#
   .....
@@ -130,6 +134,42 @@ defmodule Day10Test do
     test "visible_count", %{quad_map: map} do
       assert Day10.Map.visible_count(map, {2, 2}) == 4
     end
+  end
+
+  describe "giant rotating laser" do
+    setup [:laser_map]
+
+    test "example first rotation", %{laser_map: map} do
+      destroyed = Day10.giant_rotating_laser(map, {8, 3})
+
+      assert destroyed == [{8, 1}, {9, 0}, {9, 1}]
+      assert Enum.at(destroyed, 0) == {8, 1}
+      assert Enum.at(destroyed, 1) == {9, 0}
+      assert Enum.at(destroyed, 2) == {9, 1}
+    end
+
+    test "example second rotation", %{laser_map: map} do
+      destroyed = Day10.giant_rotating_laser(map, {8, 3})
+
+      assert Enum.at(destroyed, 9) == {12, 2}
+      assert Enum.at(destroyed, 10) == {12, 3}
+      assert Enum.at(destroyed, 11) == {12, 4}
+      assert Enum.at(destroyed, 14) == {12, 3}
+    end
+  end
+
+  defp laser_map(_context) do
+    map =
+      ~S"""
+      .#....#####...#..
+      ##...##.#####..##
+      ##...#...#.#####.
+      ..#.....X...###..
+      ..#.#.....#....##
+      """
+      |> load()
+
+    [laser_map: map]
   end
 
   defp quad_map(_context) do
