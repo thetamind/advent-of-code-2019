@@ -11,23 +11,43 @@ defmodule Day10 do
     input
     |> load()
     |> giant_rotating_laser(station)
-    |> IO.inspect(width: 140, limit: 20)
     |> Enum.at(200)
   end
 
   def giant_rotating_laser(asteroids, source) do
-    Day10.Map.sorted_slopes(asteroids, source)
-    |> Map.to_list()
-    |> Enum.map(fn {key, points} -> {key, List.first(points)} end)
-    |> Enum.sort_by(fn {{_quad, _slope}, value} ->
-      {dx, dy} = vector(source, value)
-      :math.atan2(dy, dx)
-    end)
-    |> IO.inspect()
+    asteroids =
+      Day10.Map.sorted_slopes(asteroids, source)
+      |> Map.to_list()
+      |> Enum.map(fn {key, points} ->
+        value = List.first(points)
+        vector = vector(source, value)
+        atan2 = atan2(vector)
+        {key, value, vector, atan2}
+      end)
+      |> Enum.sort_by(fn {{quad, _slope}, _value, _vector, atan2} ->
+        {quad, atan2}
+      end)
+      |> Enum.reverse()
+
+    index =
+      Enum.find_index(asteroids, fn {{q, _slope}, _value, _vector, atan2} ->
+        q == :I && atan2 <= :math.pi() * 1.5
+      end)
+
+    {a, b} = Enum.split(asteroids, index)
+
+    (b ++ a)
+    |> List.flatten()
+    |> Enum.map(fn {_slope, position, _vector, _atan2} -> position end)
   end
 
   defp vector({x1, y1}, {x2, y2}) do
-    {x2 - x1, y2 - y1}
+    # Invert y to give math-normal positive y is up
+    {x2 - x1, y1 - y2}
+  end
+
+  defp atan2({dx, dy}) do
+    :math.atan2(dy, dx) + :math.pi()
   end
 
   def parse(string) do
@@ -112,14 +132,15 @@ defmodule Day10.Map do
 
   def slope_with_quad({x1, y1}, {x2, y2}) do
     run = x2 - x1
-    rise = y2 - y1
+    # Invert y to give math-normal positive y is up
+    rise = y1 - y2
 
     quad =
       cond do
-        pos(run) and neg(rise) -> :I
-        neg(run) and neg(rise) -> :II
-        neg(run) and pos(rise) -> :III
-        pos(run) and pos(rise) -> :IV
+        pos(run) and pos(rise) -> :I
+        neg(run) and pos(rise) -> :II
+        neg(run) and neg(rise) -> :III
+        pos(run) and neg(rise) -> :IV
       end
 
     slope =

@@ -142,10 +142,7 @@ defmodule Day10Test do
     test "example first rotation", %{laser_map: map} do
       destroyed = Day10.giant_rotating_laser(map, {8, 3})
 
-      assert destroyed == [{8, 1}, {9, 0}, {9, 1}]
-      assert Enum.at(destroyed, 0) == {8, 1}
-      assert Enum.at(destroyed, 1) == {9, 0}
-      assert Enum.at(destroyed, 2) == {9, 1}
+      assert Enum.take(destroyed, 3) == [{8, 1}, {9, 0}, {9, 1}]
     end
 
     test "example second rotation", %{laser_map: map} do
