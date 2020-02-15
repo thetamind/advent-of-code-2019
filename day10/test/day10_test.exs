@@ -10,7 +10,7 @@ defmodule Day10Test do
   end
 
   test "part 2 solution" do
-    assert part2(File.read!("data/input.txt"), {17, 22}) == -1
+    assert part2(File.read!("data/input.txt"), {17, 22}) == {2, 18}
   end
 
   @small_example ~S"""
@@ -142,16 +142,33 @@ defmodule Day10Test do
     test "example first rotation", %{laser_map: map} do
       destroyed = Day10.giant_rotating_laser(map, {8, 3})
 
-      assert Enum.take(destroyed, 3) == [{8, 1}, {9, 0}, {9, 1}]
+      assert Enum.take(destroyed, 9) == [
+               {8, 1},
+               {9, 0},
+               {9, 1},
+               {10, 0},
+               {9, 2},
+               {11, 1},
+               {12, 1},
+               {11, 2},
+               {15, 1}
+             ]
     end
 
     test "example second rotation", %{laser_map: map} do
       destroyed = Day10.giant_rotating_laser(map, {8, 3})
 
-      assert Enum.at(destroyed, 9) == {12, 2}
-      assert Enum.at(destroyed, 10) == {12, 3}
-      assert Enum.at(destroyed, 11) == {12, 4}
-      assert Enum.at(destroyed, 14) == {12, 3}
+      assert Enum.take(destroyed, 18) |> Enum.drop(9) == [
+               {12, 2},
+               {13, 2},
+               {14, 2},
+               {15, 2},
+               {12, 3},
+               {16, 4},
+               {15, 4},
+               {10, 4},
+               {4, 4}
+             ]
     end
   end
 

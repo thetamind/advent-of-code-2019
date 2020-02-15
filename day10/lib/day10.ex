@@ -15,11 +15,19 @@ defmodule Day10 do
   end
 
   def giant_rotating_laser(asteroids, source) do
-    asteroids =
+    asteroid_groups =
       Day10.Map.sorted_slopes(asteroids, source)
-      |> Map.to_list()
-      |> Enum.map(fn {key, points} ->
-        value = List.first(points)
+      |> Day10.Map.transpose_map()
+
+    asteroid_groups
+    |> Enum.map(&rotate_laser(&1, source))
+    |> List.flatten()
+  end
+
+  def rotate_laser(asteroid_group, source) do
+    asteroids =
+      asteroid_group
+      |> Enum.map(fn {key, value} ->
         vector = vector(source, value)
         atan2 = atan2(vector)
         {key, value, vector, atan2}
