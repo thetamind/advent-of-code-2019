@@ -155,6 +155,40 @@ defmodule Day10Test do
     end
   end
 
+  test "transpose rotate values" do
+    orig = [
+      [1, 2, 3],
+      [11, 12, 13, 14],
+      [21, 22]
+    ]
+
+    expected = [
+      [1, 11, 21],
+      [2, 12, 22],
+      [3, 13],
+      [14]
+    ]
+
+    assert Day10.Map.transpose(orig) == expected
+  end
+
+  test "transpose_map pair with keys while rotating values" do
+    orig = %{
+      a: [1, 2, 3],
+      b: [11, 12, 13, 14],
+      c: [21, 22]
+    }
+
+    expected = [
+      [a: 1, b: 11, c: 21],
+      [a: 2, b: 12, c: 22],
+      [a: 3, b: 13],
+      [b: 14]
+    ]
+
+    assert Day10.Map.transpose_map(orig) == expected
+  end
+
   defp laser_map(_context) do
     map =
       ~S"""

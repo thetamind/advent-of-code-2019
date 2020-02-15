@@ -171,4 +171,23 @@ defmodule Day10.Map do
 
   defp pos(num), do: num >= 0
   defp neg(num), do: not pos(num)
+
+  def transpose_map(map) do
+    map
+    |> Enum.map(fn {k, values} ->
+      Enum.map(values, fn v -> {k, v} end)
+    end)
+    |> transpose()
+  end
+
+  # this crazy clever algorithm hails from
+  # http://stackoverflow.com/questions/5389254/transposing-a-2-dimensional-matrix-in-erlang
+  # and is apparently from the Haskell stdlib. I implicitly trust Haskellers.
+  def transpose([[x | xs] | xss]) do
+    [[x | for([h | _] <- xss, do: h)] | transpose([xs | for([_ | t] <- xss, do: t)])]
+  end
+
+  def transpose([[] | xss]), do: transpose(xss)
+
+  def transpose([]), do: []
 end
