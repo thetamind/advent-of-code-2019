@@ -11,7 +11,7 @@ defmodule Day10 do
     input
     |> load()
     |> giant_rotating_laser(station)
-    |> Enum.at(200)
+    |> Enum.at(200 - 1)
   end
 
   def giant_rotating_laser(asteroids, source) do
