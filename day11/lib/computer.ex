@@ -219,5 +219,9 @@ defmodule Computer do
 
   def output(%{output: output}), do: output
 
+  def consume_output(%{output: output} = state) do
+    {output, %{state | output: []}}
+  end
+
   def halted?(%{state: state}), do: state == :halt
 end
