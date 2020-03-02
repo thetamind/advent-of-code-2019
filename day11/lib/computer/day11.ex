@@ -103,11 +103,30 @@ defmodule Computer.Day11 do
     end
   end
 
+  defp inspect_dir(dir) do
+    case dir do
+      :up -> "^"
+      :down -> "v"
+      :left -> "<"
+      :right -> ">"
+    end
+  end
+
+  defp inspect_panel(panels, pos) do
+    case Map.get(panels, pos, :black) do
+      :black -> "."
+      :white -> "#"
+    end
+  end
+
   def inspect(state, radius) do
     for y <- -radius..radius do
       for x <- -radius..radius do
         point = {x, y}
-        if state.pos == point, do: "^", else: "."
+
+        if state.pos == point,
+          do: inspect_dir(state.dir),
+          else: inspect_panel(state.panels, point)
       end
     end
     |> Enum.join("\n")
