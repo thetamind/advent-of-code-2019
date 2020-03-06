@@ -19,8 +19,15 @@ defmodule Computer.Day11 do
   def part1(input) do
     input
     |> load()
-    |> Computer.run()
-    |> Computer.output()
+    |> init()
+    |> run_until_halted()
+    |> panels_painted()
+  end
+
+  def run_until_halted(%{computer: %{state: :halt}} = state), do: state
+
+  def run_until_halted(state) do
+    step(state) |> run_until_halted()
   end
 
   def panels_painted(%{panels: panels}) do

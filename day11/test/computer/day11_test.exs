@@ -5,7 +5,7 @@ defmodule Computer.Day11Test do
 
   test "part 1 solution" do
     input = File.read!("data/day11.txt")
-    assert Day11.part1(input) == -1
+    assert Day11.part1(input) == 2172
   end
 
   describe "example" do
