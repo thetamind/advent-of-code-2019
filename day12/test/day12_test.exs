@@ -31,5 +31,19 @@ defmodule Day12Test do
       assert Simulation.get_moon(sim, 0) |> Moon.position() == {-1, 0, 2}
       assert Simulation.get_moon(sim, 3) |> Moon.velocity() == {0, 0, 0}
     end
+
+    test "simulation step 1" do
+      positions = load(@example1)
+
+      sim =
+        Simulation.new(positions)
+        |> Simulation.step()
+
+      assert sim.step == 1
+      assert Simulation.get_moon(sim, 0) |> Moon.position() == {2, -1, 1}
+      assert Simulation.get_moon(sim, 1) |> Moon.position() == {3, -7, -4}
+      assert Simulation.get_moon(sim, 2) |> Moon.position() == {1, -7, 5}
+      assert Simulation.get_moon(sim, 3) |> Moon.position() == {2, 2, 0}
+    end
   end
 end

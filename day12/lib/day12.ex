@@ -8,6 +8,10 @@ defmodule Day12 do
     def new({x, y, z}) do
       %__MODULE__{x: x, y: y, z: z}
     end
+
+    def move(%{x: x, y: y, z: z} = pos, %{x: dx, y: dy, z: dz}) do
+      %{pos | x: x + dx, y: y + dy, z: z + dz}
+    end
   end
 
   defmodule Velocity do
@@ -35,6 +39,10 @@ defmodule Day12 do
       %__MODULE__{position: Position.new(pos), velocity: Velocity.zero()}
     end
 
+    def move(%{position: pos, velocity: vel} = moon) do
+      %{moon | position: Position.move(pos, vel)}
+    end
+
     def position(%{position: %{x: x, y: y, z: z}}), do: {x, y, z}
     def velocity(%{velocity: %{x: x, y: y, z: z}}), do: {x, y, z}
   end
@@ -53,6 +61,26 @@ defmodule Day12 do
 
     def get_moon(sim, index) do
       Enum.at(sim.moons, index)
+    end
+
+    def step(%{step: step, moons: moons} = sim) do
+      new_moons =
+        moons
+        |> apply_gravity()
+        |> apply_velocity()
+
+      %{sim | step: step + 1, moons: new_moons}
+    end
+
+    def apply_gravity(moons) do
+      moons
+      |> Enum.map(fn moon ->
+        %{moon | velocity: %Velocity{x: 100, y: 100, z: 100}}
+      end)
+    end
+
+    def apply_velocity(moons) do
+      Enum.map(moons, &Moon.move/1)
     end
   end
 
