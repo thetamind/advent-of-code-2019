@@ -23,6 +23,10 @@ defmodule Computer.Day11 do
     |> Computer.output()
   end
 
+  def panels_painted(%{panels: panels}) do
+    Map.keys(panels) |> Enum.count()
+  end
+
   def init(program) do
     %__MODULE__{computer: Computer.new(program, %{})}
   end

@@ -65,5 +65,32 @@ defmodule Computer.Day11Test do
 
       assert Day11.inspect(state, 2) == expected, Day11.inspect(state, 2)
     end
+
+    test "count panels painted at least once" do
+      program = Computer.load(File.read!("data/day11.txt"))
+
+      state =
+        Day11.init(program)
+        # Suppose the robot eventually outputs 1 (paint white) and then 0 (turn left).
+        |> Day11.paint(:white)
+        |> Day11.move(:left)
+        # Next, the robot might output 0 (paint black) and then 0 (turn left)
+        |> Day11.paint(:black)
+        |> Day11.move(:left)
+        # After more outputs (1,0, 1,0)
+        |> Day11.paint(:white)
+        |> Day11.move(:left)
+        |> Day11.paint(:white)
+        |> Day11.move(:left)
+        # After several more outputs (0,1, 1,0, 1,0)
+        |> Day11.paint(:black)
+        |> Day11.move(:right)
+        |> Day11.paint(:white)
+        |> Day11.move(:left)
+        |> Day11.paint(:white)
+        |> Day11.move(:left)
+
+      assert Day11.panels_painted(state) == 6, Day11.inspect(state, 2)
+    end
   end
 end
