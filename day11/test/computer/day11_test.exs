@@ -8,6 +8,25 @@ defmodule Computer.Day11Test do
     assert Day11.part1(input) == 2172
   end
 
+  test "part 2 solution" do
+    # JELEFGHP
+    expected =
+      ~S"""
+      ...........................................
+      ...##.####.#....####.####..##..#..#.###....
+      ....#.#....#....#....#....#..#.#..#.#..#...
+      ....#.###..#....###..###..#....####.#..#...
+      ....#.#....#....#....#....#.##.#..#.###....
+      .#..#.#....#....#....#....#..#.#..#.#....>.
+      ..##..####.####.####.#.....###.#..#.#......
+      ...........................................
+      """
+      |> String.trim_trailing("\n")
+
+    input = File.read!("data/day11.txt")
+    assert Day11.part2(input) == expected
+  end
+
   describe "example" do
     test "step 1" do
       expected =

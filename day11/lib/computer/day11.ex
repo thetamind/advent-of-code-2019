@@ -2,6 +2,7 @@ defmodule Computer.Day11 do
   @moduledoc false
 
   import Computer
+  import Kernel, except: [inspect: 2]
 
   defstruct computer: nil, pos: {0, 0}, dir: :up, panels: %{}
 
@@ -22,6 +23,15 @@ defmodule Computer.Day11 do
     |> init()
     |> run_until_halted()
     |> panels_painted()
+  end
+
+  def part2(input) do
+    input
+    |> load()
+    |> init()
+    |> paint(:white)
+    |> run_until_halted()
+    |> inspect({0..42, -1..6})
   end
 
   def run_until_halted(%{computer: %{state: :halt}} = state), do: state
@@ -130,9 +140,13 @@ defmodule Computer.Day11 do
     end
   end
 
-  def inspect(state, radius) do
-    for y <- -radius..radius do
-      for x <- -radius..radius do
+  def inspect(state, radius) when is_integer(radius) do
+    inspect(state, {-radius..radius, -radius..radius})
+  end
+
+  def inspect(state, {x_extent, y_extent}) do
+    for y <- y_extent do
+      for x <- x_extent do
         point = {x, y}
 
         if state.pos == point,
