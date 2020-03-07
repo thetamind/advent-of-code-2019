@@ -25,6 +25,14 @@ defmodule Day12 do
     def zero() do
       %__MODULE__{x: 0, y: 0, z: 0}
     end
+
+    def invert(%{x: x, y: y, z: z} = vel) do
+      %{vel | x: -x, y: -y, z: -z}
+    end
+
+    def change(%{x: x, y: y, z: z} = vel, %{x: dx, y: dy, z: dz}) do
+      %{vel | x: x + dx, y: y + dy, z: z + dz}
+    end
   end
 
   defmodule Moon do
@@ -41,6 +49,34 @@ defmodule Day12 do
 
     def move(%{position: pos, velocity: vel} = moon) do
       %{moon | position: Position.move(pos, vel)}
+    end
+
+    def change_velocity(%{velocity: vel} = moon, change) do
+      %{moon | velocity: Velocity.change(vel, change)}
+    end
+
+    def velocity_from_gravity(moon_a, moon_b) do
+      {xa, ya, za} = position(moon_a)
+      {xb, yb, zb} = position(moon_b)
+
+      dx = pull(xa, xb)
+      dy = pull(ya, yb)
+      dz = pull(za, zb)
+
+      vel_a = Velocity.new({dx, dy, dz})
+
+      {vel_a, Velocity.invert(vel_a)}
+    end
+
+    def pull(a, b) when is_integer(a) and is_integer(b) do
+      a = abs(a)
+      b = abs(b)
+
+      cond do
+        a < b -> +1
+        a == b -> 0
+        a > b -> -1
+      end
     end
 
     def position(%{position: %{x: x, y: y, z: z}}), do: {x, y, z}
@@ -73,14 +109,40 @@ defmodule Day12 do
     end
 
     def apply_gravity(moons) do
-      moons
-      |> Enum.map(fn moon ->
-        %{moon | velocity: %Velocity{x: 100, y: 100, z: 100}}
+      changes =
+        moons
+        |> Enum.with_index()
+        |> pairs()
+        |> Enum.map(fn [{moon_a, index_a}, {moon_b, index_b}] ->
+          {vel_a, vel_b} = Moon.velocity_from_gravity(moon_a, moon_b)
+
+          [{vel_a, index_a}, {vel_b, index_b}]
+        end)
+        |> List.flatten()
+
+      moons_with_index = Enum.with_index(moons)
+      moon_map = Map.new(moons_with_index, fn {moon, idx} -> {idx, moon} end)
+
+      Enum.reduce(changes, moon_map, fn {change, index}, acc ->
+        Map.update!(acc, index, fn moon -> Moon.change_velocity(moon, change) end)
       end)
+      |> Map.to_list()
+      |> Enum.sort_by(&elem(&1, 0), :asc)
+      |> Enum.map(&elem(&1, 1))
     end
 
     def apply_velocity(moons) do
       Enum.map(moons, &Moon.move/1)
+    end
+
+    defp pairs(list), do: comb(2, list)
+
+    @spec comb(non_neg_integer(), Enum.t()) :: [Enum.t()]
+    defp comb(0, _), do: [[]]
+    defp comb(_, []), do: []
+
+    defp comb(m, [h | t]) do
+      for(l <- comb(m - 1, t), do: [h | l]) ++ comb(m, t)
     end
   end
 
