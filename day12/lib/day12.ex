@@ -109,33 +109,31 @@ defmodule Day12 do
     end
 
     def apply_gravity(moons) do
+      moons = Array.from_list(moons) |> Array.fix()
+      pairs = pairs(Enum.to_list(0..(Array.size(moons) - 1)))
+
       changes =
-        moons
-        |> Enum.with_index()
-        |> pairs()
-        |> Enum.map(fn [{moon_a, index_a}, {moon_b, index_b}] ->
+        pairs
+        |> Enum.map(fn [index_a, index_b] ->
+          moon_a = Array.get(moons, index_a)
+          moon_b = Array.get(moons, index_b)
           {vel_a, vel_b} = Moon.velocity_from_gravity(moon_a, moon_b)
 
           [{vel_a, index_a}, {vel_b, index_b}]
         end)
         |> List.flatten()
 
-      moons_with_index = Enum.with_index(moons)
-      moon_map = Map.new(moons_with_index, fn {moon, idx} -> {idx, moon} end)
-
-      Enum.reduce(changes, moon_map, fn {change, index}, acc ->
-        Map.update!(acc, index, fn moon -> Moon.change_velocity(moon, change) end)
+      Enum.reduce(changes, moons, fn {change, index}, acc ->
+        Array.update(acc, index, fn moon -> Moon.change_velocity(moon, change) end)
       end)
-      |> Map.to_list()
-      |> Enum.sort_by(&elem(&1, 0), :asc)
-      |> Enum.map(&elem(&1, 1))
+      |> Array.to_list()
     end
 
     def apply_velocity(moons) do
       Enum.map(moons, &Moon.move/1)
     end
 
-    defp pairs(list), do: comb(2, list)
+    defp pairs(list) when is_list(list), do: comb(2, list)
 
     @spec comb(non_neg_integer(), Enum.t()) :: [Enum.t()]
     defp comb(0, _), do: [[]]

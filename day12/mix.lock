@@ -1,0 +1,3 @@
+%{
+  "array": {:git, "https://github.com/mat-hek/elixir-array.git", "8133653414ce7cf2775168abd88d740e7d936d30", [ref: "8133653"]},
+}
