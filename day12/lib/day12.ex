@@ -69,9 +69,6 @@ defmodule Day12 do
     end
 
     def pull(a, b) when is_integer(a) and is_integer(b) do
-      a = abs(a)
-      b = abs(b)
-
       cond do
         a < b -> +1
         a == b -> 0

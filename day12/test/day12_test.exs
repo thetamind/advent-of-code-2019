@@ -2,7 +2,7 @@ defmodule Day12Test do
   use ExUnit.Case
 
   import Day12
-  alias Day12.{Moon, Simulation}
+  alias Day12.{Moon, Simulation, Velocity}
 
   @example1 ~S"""
   <x=-1, y=0, z=2>
@@ -32,18 +32,26 @@ defmodule Day12Test do
       assert Simulation.get_moon(sim, 3) |> Moon.velocity() == {0, 0, 0}
     end
 
-    test "simulation step 1" do
-      positions = load(@example1)
+    test "gravity" do
+      ganymede = Moon.new({3, 9, 0})
+      callisto = Moon.new({5, 9, 0})
 
+      {vel_g, vel_c} = Moon.velocity_from_gravity(ganymede, callisto)
+
+      assert vel_g == Velocity.new({1, 0, 0})
+      assert vel_c == Velocity.new({-1, 0, 0})
+    end
+
+    test "simulation step 1" do
       sim =
-        Simulation.new(positions)
+        Simulation.new(load(@example1))
         |> Simulation.step()
 
-      assert sim.step == 1
-      assert Simulation.get_moon(sim, 0) |> Moon.position() == {2, -1, 1}
-      assert Simulation.get_moon(sim, 1) |> Moon.position() == {3, -7, -4}
-      assert Simulation.get_moon(sim, 2) |> Moon.position() == {1, -7, 5}
-      assert Simulation.get_moon(sim, 3) |> Moon.position() == {2, 2, 0}
+      velocities = sim.moons |> Enum.map(&Moon.velocity/1)
+      positions = sim.moons |> Enum.map(&Moon.position/1)
+
+      assert velocities == [{3, -1, -1}, {1, 3, 3}, {-3, 1, -3}, {-1, -3, 1}]
+      assert positions == [{2, -1, 1}, {3, -7, -4}, {1, -7, 5}, {2, 2, 0}]
     end
   end
 end
