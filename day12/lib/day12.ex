@@ -96,6 +96,16 @@ defmodule Day12 do
       Enum.at(sim.moons, index)
     end
 
+    def at_step(sim, target_step) do
+      if target_step < sim.step do
+        msg = "Cannot run simulator (at step #{sim.step}) backwards to reach target step #{target_step}"
+        raise(ArgumentError, msg)
+      end
+
+      Stream.iterate(sim, &step/1)
+      |> Enum.at(target_step - sim.step)
+    end
+
     def step(%{step: step, moons: moons} = sim) do
       new_moons =
         moons
