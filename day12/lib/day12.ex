@@ -47,6 +47,18 @@ defmodule Day12 do
       %__MODULE__{position: Position.new(pos), velocity: Velocity.zero()}
     end
 
+    def total_energy(moon) do
+      potential_energy(moon) * kinetic_energy(moon)
+    end
+
+    def potential_energy(%{position: pos}), do: energy(pos)
+
+    def kinetic_energy(%{velocity: vel}), do: energy(vel)
+
+    defp energy(%{x: x, y: y, z: z}) do
+      abs(x) + abs(y) + abs(z)
+    end
+
     def move(%{position: pos, velocity: vel} = moon) do
       %{moon | position: Position.move(pos, vel)}
     end
@@ -94,6 +106,12 @@ defmodule Day12 do
 
     def get_moon(sim, index) do
       Enum.at(sim.moons, index)
+    end
+
+    def total_energy(sim) do
+      sim.moons
+      |> Enum.map(&Moon.total_energy/1)
+      |> Enum.sum()
     end
 
     def at_step(sim, target_step) do

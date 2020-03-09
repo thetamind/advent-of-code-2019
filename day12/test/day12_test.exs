@@ -77,4 +77,22 @@ defmodule Day12Test do
       assert positions == [{8, -12, -9}, {13, 16, -3}, {-29, -11, -1}, {16, -13, 23}]
     end
   end
+
+  describe "total energy" do
+    test "example 1" do
+      sim =
+        Simulation.new(load(@example1))
+        |> Simulation.at_step(10)
+
+      assert Simulation.total_energy(sim) == 179
+    end
+
+    test "example 2" do
+      sim =
+        Simulation.new(load(@example2))
+        |> Simulation.at_step(100)
+
+      assert Simulation.total_energy(sim) == 1940
+    end
+  end
 end
