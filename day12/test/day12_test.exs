@@ -18,6 +18,15 @@ defmodule Day12Test do
   <x=9, y=-8, z=-3>
   """
 
+  test "part 1 solution" do
+    sim =
+      load(File.read!("data/input.txt"))
+      |> Simulation.new()
+      |> Simulation.at_step(1_000)
+
+    assert Simulation.total_energy(sim) == 10_189
+  end
+
   describe "example 1" do
     test "parse moon positions" do
       expected = [
