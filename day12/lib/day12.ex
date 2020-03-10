@@ -114,14 +114,17 @@ defmodule Day12 do
       |> Enum.sum()
     end
 
+    def stream(sim) do
+      Stream.iterate(sim, &step/1)
+    end
+
     def at_step(sim, target_step) do
       if target_step < sim.step do
         msg = "Cannot run simulator (at step #{sim.step}) backwards to reach target step #{target_step}"
         raise(ArgumentError, msg)
       end
 
-      Stream.iterate(sim, &step/1)
-      |> Enum.at(target_step - sim.step)
+      Enum.at(stream(sim), target_step - sim.step)
     end
 
     def step(%{step: step, moons: moons} = sim) do
@@ -167,6 +170,17 @@ defmodule Day12 do
     defp comb(m, [h | t]) do
       for(l <- comb(m - 1, t), do: [h | l]) ++ comb(m, t)
     end
+  end
+
+  def find_repeat(target_sim) do
+    target_moons = target_sim.moons
+
+    target_sim
+    |> Simulation.stream()
+    |> Stream.drop(1)
+    |> Enum.find(fn sim ->
+      sim.moons == target_moons
+    end)
   end
 
   def load(input) do

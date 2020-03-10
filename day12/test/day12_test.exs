@@ -27,6 +27,43 @@ defmodule Day12Test do
     assert Simulation.total_energy(sim) == 10_189
   end
 
+  describe "part 2" do
+    @describetag timeout: 2_000
+
+    test "part 2 solution" do
+      step0 =
+        load(File.read!("data/input.txt"))
+        |> Simulation.new()
+
+      last = Day12.find_repeat(step0)
+
+      assert last.step != 0
+      assert step0.moons == last.moons
+    end
+
+    test "example 1" do
+      step0 =
+        load(@example1)
+        |> Simulation.new()
+
+      last = Day12.find_repeat(step0)
+
+      assert last.step == 2772
+      assert step0.moons == last.moons
+    end
+
+    test "example 2" do
+      step0 =
+        load(@example2)
+        |> Simulation.new()
+
+      last = Day12.find_repeat(step0)
+
+      assert last.step == 4_686_774_924
+      assert step0.moons == last.moons
+    end
+  end
+
   describe "example 1" do
     test "parse moon positions" do
       expected = [
