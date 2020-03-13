@@ -59,12 +59,23 @@ defmodule Day12 do
       abs(x) + abs(y) + abs(z)
     end
 
+    def move({p, v}), do: {p + v, v}
+
     def move(%{position: pos, velocity: vel} = moon) do
       %{moon | position: Position.move(pos, vel)}
     end
 
+    def change_velocity({p, v}, change) do
+      {p, v + change}
+    end
+
     def change_velocity(%{velocity: vel} = moon, change) do
       %{moon | velocity: Velocity.change(vel, change)}
+    end
+
+    def velocity_from_gravity({pa, _va}, {pb, _vb}) do
+      delta = pull(pa, pb)
+      {delta, -delta}
     end
 
     def velocity_from_gravity(moon_a, moon_b) do
@@ -86,6 +97,14 @@ defmodule Day12 do
         a == b -> 0
         a > b -> -1
       end
+    end
+
+    def to_components(%{position: %{x: x, y: y, z: z}, velocity: %{x: vx, y: vy, z: vz}}) do
+      [{x, vx}, {y, vy}, {z, vz}]
+    end
+
+    def from_components([{x, vx}, {y, vy}, {z, vz}]) do
+      %__MODULE__{position: Position.new({x, y, z}), velocity: Velocity.new({vx, vy, vz})}
     end
 
     def position(%{position: %{x: x, y: y, z: z}}), do: {x, y, z}
@@ -181,6 +200,106 @@ defmodule Day12 do
     |> Enum.find(fn sim ->
       sim.moons == target_moons
     end)
+  end
+
+  defmodule FastSim do
+    defstruct step: 0, moons: []
+
+    @type pos_vel :: {Position.single(), Velocity.single()}
+    @type t :: %__MODULE__{step: non_neg_integer(), moons: [Moon.t()]}
+
+    def split_axis(moons) do
+      moons
+      |> Enum.map(&Moon.to_components/1)
+      |> transpose()
+    end
+
+    def calculate_periods(%{step: _step, moons: moons}) do
+      moons
+      |> split_axis()
+      |> Enum.map(&calculate_period/1)
+    end
+
+    def calculate_period(xs) do
+      xs = Array.from_list(xs) |> Array.fix()
+      target_xs = xs
+
+      result =
+        %{step: 0, positions: xs}
+        |> Stream.iterate(&step/1)
+        |> Stream.drop(1)
+        |> Enum.find(fn sim ->
+          Array.equal?(sim.positions, target_xs)
+        end)
+
+      result.step
+    end
+
+    def step(%{step: step, positions: positions} = sim) do
+      new_positions =
+        positions
+        |> apply_gravity()
+        |> apply_velocity()
+
+      %{sim | step: step + 1, positions: new_positions}
+    end
+
+    def apply_gravity(positions) do
+      pairs = pairs(Enum.to_list(0..(Array.size(positions) - 1)))
+
+      changes =
+        pairs
+        |> Enum.map(fn [index_a, index_b] ->
+          pos_vec_a = Array.get(positions, index_a)
+          pos_vec_b = Array.get(positions, index_b)
+
+          {vel_a, vel_b} = Moon.velocity_from_gravity(pos_vec_a, pos_vec_b)
+
+          [{vel_a, index_a}, {vel_b, index_b}]
+        end)
+        |> List.flatten()
+
+      Enum.reduce(changes, positions, fn {change, index}, acc ->
+        Array.update(acc, index, fn pos_vel -> Moon.change_velocity(pos_vel, change) end)
+      end)
+    end
+
+    def apply_velocity(positions) do
+      Array.map(positions, fn _, pos -> Moon.move(pos) end)
+    end
+
+    def gcd(a, 0), do: a
+    def gcd(0, b), do: b
+    def gcd(a, b), do: gcd(b, rem(a, b))
+
+    def lcm(0, 0), do: 0
+    def lcm(a, b), do: div(a * b, gcd(a, b))
+
+    defp pairs(list) when is_list(list), do: comb(2, list)
+
+    @spec comb(non_neg_integer(), Enum.t()) :: [Enum.t()]
+    defp comb(0, _), do: [[]]
+    defp comb(_, []), do: []
+
+    defp comb(m, [h | t]) do
+      for(l <- comb(m - 1, t), do: [h | l]) ++ comb(m, t)
+    end
+
+    # this crazy clever algorithm hails from
+    # http://stackoverflow.com/questions/5389254/transposing-a-2-dimensional-matrix-in-erlang
+    # and is apparently from the Haskell stdlib. I implicitly trust Haskellers.
+    def transpose([[x | xs] | xss]) do
+      [[x | for([h | _] <- xss, do: h)] | transpose([xs | for([_ | t] <- xss, do: t)])]
+    end
+
+    def transpose([[] | xss]), do: transpose(xss)
+
+    def transpose([]), do: []
+  end
+
+  def find_repeat_fast(target_sim) do
+    [x_period, y_period, z_period] = FastSim.calculate_periods(target_sim)
+    FastSim.lcm(x_period, y_period) |> FastSim.lcm(z_period)
   end
 
   def load(input) do

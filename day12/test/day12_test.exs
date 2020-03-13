@@ -28,17 +28,14 @@ defmodule Day12Test do
   end
 
   describe "part 2" do
-    @describetag timeout: 2_000
+    @describetag timeout: 10_000
 
-    test "part 2 solution" do
+    test "solution" do
       step0 =
         load(File.read!("data/input.txt"))
         |> Simulation.new()
 
-      last = Day12.find_repeat(step0)
-
-      assert last.step != 0
-      assert step0.moons == last.moons
+      assert Day12.find_repeat_fast(step0) == 469_671_086_427_712
     end
 
     test "example 1" do
@@ -52,15 +49,20 @@ defmodule Day12Test do
       assert step0.moons == last.moons
     end
 
+    test "example 1 fast" do
+      step0 =
+        load(@example1)
+        |> Simulation.new()
+
+      assert Day12.find_repeat_fast(step0) == 2772
+    end
+
     test "example 2" do
       step0 =
         load(@example2)
         |> Simulation.new()
 
-      last = Day12.find_repeat(step0)
-
-      assert last.step == 4_686_774_924
-      assert step0.moons == last.moons
+      assert Day12.find_repeat_fast(step0) == 4_686_774_924
     end
   end
 
