@@ -207,9 +207,10 @@ defmodule Day12 do
     end
 
     def calculate_periods(%{step: _step, moons: moons}) do
-      moons
-      |> split_axis()
-      |> Enum.map(&calculate_period/1)
+      axes = split_axis(moons)
+
+      Task.async_stream(axes, __MODULE__, :calculate_period, [], ordered: false)
+      |> Enum.map(fn {:ok, period} -> period end)
     end
 
     def calculate_period(xs) do
