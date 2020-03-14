@@ -12,6 +12,18 @@ defmodule Computer do
             memory: [],
             uma: %{}
 
+  @type run_state :: :virgin | :halt | :wait_input
+  @type t :: %__MODULE__{
+          ip: non_neg_integer(),
+          base: integer(),
+          input: [integer()],
+          output: [integer()],
+          state: run_state(),
+          label: String.t(),
+          memory: [integer()],
+          uma: %{optional(non_neg_integer()) => integer()}
+        }
+
   def new() do
     %__MODULE__{}
   end
