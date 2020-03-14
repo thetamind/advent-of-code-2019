@@ -28,7 +28,7 @@ defmodule Day12Test do
   end
 
   describe "part 2" do
-    @describetag timeout: 10_000
+    @describetag timeout: 20_000
 
     test "solution" do
       step0 =

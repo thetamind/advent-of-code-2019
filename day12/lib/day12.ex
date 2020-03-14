@@ -1,6 +1,8 @@
 defmodule Day12 do
   @moduledoc false
 
+  alias Day12.Utils
+
   defmodule Position do
     defstruct [:x, :y, :z]
     @type t :: %__MODULE__{x: integer(), y: integer(), z: integer()}
@@ -180,15 +182,7 @@ defmodule Day12 do
       Enum.map(moons, &Moon.move/1)
     end
 
-    defp pairs(list) when is_list(list), do: comb(2, list)
-
-    @spec comb(non_neg_integer(), Enum.t()) :: [Enum.t()]
-    defp comb(0, _), do: [[]]
-    defp comb(_, []), do: []
-
-    defp comb(m, [h | t]) do
-      for(l <- comb(m - 1, t), do: [h | l]) ++ comb(m, t)
-    end
+    defp pairs(list) when is_list(list), do: Utils.comb(2, list)
   end
 
   def find_repeat(target_sim) do
@@ -204,14 +198,12 @@ defmodule Day12 do
 
   defmodule FastSim do
     defstruct step: 0, moons: []
-
-    @type pos_vel :: {Position.single(), Velocity.single()}
     @type t :: %__MODULE__{step: non_neg_integer(), moons: [Moon.t()]}
 
     def split_axis(moons) do
       moons
       |> Enum.map(&Moon.to_components/1)
-      |> transpose()
+      |> Utils.transpose()
     end
 
     def calculate_periods(%{step: _step, moons: moons}) do
@@ -268,38 +260,12 @@ defmodule Day12 do
       Array.map(positions, fn _, pos -> Moon.move(pos) end)
     end
 
-    def gcd(a, 0), do: a
-    def gcd(0, b), do: b
-    def gcd(a, b), do: gcd(b, rem(a, b))
-
-    def lcm(0, 0), do: 0
-    def lcm(a, b), do: div(a * b, gcd(a, b))
-
-    defp pairs(list) when is_list(list), do: comb(2, list)
-
-    @spec comb(non_neg_integer(), Enum.t()) :: [Enum.t()]
-    defp comb(0, _), do: [[]]
-    defp comb(_, []), do: []
-
-    defp comb(m, [h | t]) do
-      for(l <- comb(m - 1, t), do: [h | l]) ++ comb(m, t)
-    end
-
-    # this crazy clever algorithm hails from
-    # http://stackoverflow.com/questions/5389254/transposing-a-2-dimensional-matrix-in-erlang
-    # and is apparently from the Haskell stdlib. I implicitly trust Haskellers.
-    def transpose([[x | xs] | xss]) do
-      [[x | for([h | _] <- xss, do: h)] | transpose([xs | for([_ | t] <- xss, do: t)])]
-    end
-
-    def transpose([[] | xss]), do: transpose(xss)
-
-    def transpose([]), do: []
+    defp pairs(list) when is_list(list), do: Utils.comb(2, list)
   end
 
   def find_repeat_fast(target_sim) do
     [x_period, y_period, z_period] = FastSim.calculate_periods(target_sim)
-    FastSim.lcm(x_period, y_period) |> FastSim.lcm(z_period)
+    Utils.lcm(x_period, y_period) |> Utils.lcm(z_period)
   end
 
   def load(input) do
