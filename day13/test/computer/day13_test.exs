@@ -25,5 +25,11 @@ defmodule Computer.Day13Test do
                {:ball, 6, 5}
              ]
     end
+
+    test "example 2" do
+      assert Day13.parse_tiles([-1, 0, 12345]) == [
+               {:score, 12345}
+             ]
+    end
   end
 end

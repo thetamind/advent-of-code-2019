@@ -23,15 +23,19 @@ defmodule Computer.Day13 do
   end
 
   def parse_tile([x, y, tile_id]) do
-    tile =
-      case tile_id do
-        0 -> :empty
-        1 -> :wall
-        2 -> :block
-        3 -> :paddle
-        4 -> :ball
-      end
+    if x == -1 do
+      {:score, tile_id}
+    else
+      tile =
+        case tile_id do
+          0 -> :empty
+          1 -> :wall
+          2 -> :block
+          3 -> :paddle
+          4 -> :ball
+        end
 
-    {tile, x, y}
+      {tile, x, y}
+    end
   end
 end
