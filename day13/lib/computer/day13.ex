@@ -12,6 +12,26 @@ defmodule Computer.Day13 do
     |> count(:block)
   end
 
+  def part2(string) do
+    string
+    |> load()
+    |> insert_quarters()
+    |> run(%{input: [-1, -1, -1, -1, -1, -1, -1]})
+  end
+
+  def insert_quarters(program), do: List.replace_at(program, 0, 2)
+
+  def inspect(computer) do
+    computer
+    |> output()
+    |> parse_tiles()
+    |> Enum.filter(fn
+      {:score, _score} -> true
+      {tile, _x, _y} -> tile == :ball || tile == :paddle
+    end)
+    |> Kernel.inspect()
+  end
+
   def count(tiles, type) do
     Enum.count(tiles, fn {t, _x, _y} -> t == type end)
   end

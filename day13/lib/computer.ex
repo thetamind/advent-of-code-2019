@@ -116,11 +116,8 @@ defmodule Computer do
     Array.set(memory, address, value)
   end
 
-  require Logger
-
   def do_run(%{memory: memory, ip: ip} = state) do
     {op, params} = decode(memory, ip)
-    # Logger.debug("#{inspect(ip)}  #{inspect(op)}  #{inspect(params)}")
     do_run(op, params, state)
   end
 
