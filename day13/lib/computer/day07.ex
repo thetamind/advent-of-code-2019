@@ -69,9 +69,7 @@ defmodule Computer.Day07 do
     phases
     |> Enum.zip(label_gen)
     |> Enum.map(fn {phase, label} ->
-      Computer.new()
-      |> Map.put(:memory, program)
-      |> Map.put(:label, label)
+      Computer.new(program, %{label: label})
       |> Computer.add_input(phase)
     end)
   end

@@ -9,8 +9,7 @@ defmodule Computer do
             output: [],
             state: :virgin,
             label: nil,
-            memory: [],
-            uma: %{}
+            memory: Array.new(default: 0)
 
   @type run_state :: :virgin | :halt | :wait_input
   @type t :: %__MODULE__{
@@ -20,8 +19,7 @@ defmodule Computer do
           output: [integer()],
           state: run_state(),
           label: String.t(),
-          memory: [integer()],
-          uma: %{optional(non_neg_integer()) => integer()}
+          memory: Array.t()
         }
 
   def new() do
@@ -29,20 +27,20 @@ defmodule Computer do
   end
 
   def new(program, init_state) when is_map(init_state) do
-    struct!(__MODULE__, Map.put(init_state, :memory, program))
+    struct!(__MODULE__, Map.put(init_state, :memory, Array.from_list(program, 0)))
   end
 
   def run(%Computer{} = state), do: do_run(state)
   def run(memory) when is_list(memory), do: run(memory, Computer.new())
 
   def run(memory, %Computer{} = state) when is_struct(state) do
-    state = Map.put(state, :memory, memory)
+    state = Map.put(state, :memory, Array.from_list(memory, 0))
 
     do_run(state)
   end
 
   def run(memory, init_state) when is_map(init_state) do
-    state = struct!(__MODULE__, Map.put(init_state, :memory, memory))
+    state = struct!(__MODULE__, Map.put(init_state, :memory, Array.from_list(memory, 0)))
 
     do_run(state)
   end
@@ -75,7 +73,7 @@ defmodule Computer do
   def decode_mode(2), do: :relative
 
   def decode(memory, ip) do
-    slice = Enum.slice(memory, ip, 4)
+    slice = Enum.map(ip..(ip + 4 - 1), &Array.get(memory, &1))
     {op, modes} = decode_op(List.first(slice))
 
     num_params =
@@ -96,18 +94,18 @@ defmodule Computer do
     {op, Enum.zip(modes, params)}
   end
 
-  def read(%{memory: memory, uma: uma, base: base}, {mode, param}),
-    do: read(memory, uma, base, {mode, param})
+  def read(%{memory: memory, base: base}, {mode, param}),
+    do: read(memory, base, {mode, param})
 
-  def read(memory, uma, base, {mode, param}) do
+  def read(memory, base, {mode, param}) do
     case mode do
-      :position -> Enum.at(memory, param) || Map.get(uma, param, 0)
+      :position -> Array.get(memory, param)
       :immediate -> param
-      :relative -> Enum.at(memory, base + param) || Map.get(uma, base + param, 0)
+      :relative -> Array.get(memory, base + param)
     end
   end
 
-  def write(memory, uma, base, {mode, param}, value) do
+  def write(memory, base, {mode, param}, value) do
     address =
       case mode do
         :position -> param
@@ -115,11 +113,7 @@ defmodule Computer do
         :relative -> base + param
       end
 
-    if address < Enum.count(memory) do
-      {List.replace_at(memory, address, value), uma}
-    else
-      {memory, Map.put(uma, address, value)}
-    end
+    Array.set(memory, address, value)
   end
 
   require Logger
@@ -133,86 +127,86 @@ defmodule Computer do
   def do_run(
         1,
         [inpos1, inpos2, outpos],
-        %{memory: memory, uma: uma, base: base, ip: ip} = state
+        %{memory: memory, base: base, ip: ip} = state
       ) do
-    in1 = read(memory, uma, base, inpos1)
-    in2 = read(memory, uma, base, inpos2)
+    in1 = read(memory, base, inpos1)
+    in2 = read(memory, base, inpos2)
 
     value = in1 + in2
 
-    {memory, uma} = write(memory, uma, base, outpos, value)
+    memory = write(memory, base, outpos, value)
 
-    do_run(%{state | memory: memory, uma: uma, ip: ip + 4})
+    do_run(%{state | memory: memory, ip: ip + 4})
   end
 
-  def do_run(2, [inpos1, inpos2, outpos], %{memory: memory, uma: uma, base: base, ip: ip} = state) do
-    in1 = read(memory, uma, base, inpos1)
-    in2 = read(memory, uma, base, inpos2)
+  def do_run(2, [inpos1, inpos2, outpos], %{memory: memory, base: base, ip: ip} = state) do
+    in1 = read(memory, base, inpos1)
+    in2 = read(memory, base, inpos2)
     value = in1 * in2
 
-    {memory, uma} = write(memory, uma, base, outpos, value)
+    memory = write(memory, base, outpos, value)
 
-    do_run(%{state | memory: memory, uma: uma, ip: ip + 4})
+    do_run(%{state | memory: memory, ip: ip + 4})
   end
 
-  def do_run(3, [address], %{memory: memory, uma: uma, base: base, ip: ip, input: input} = state) do
+  def do_run(3, [address], %{memory: memory, base: base, ip: ip, input: input} = state) do
     if input == [] do
       %{state | state: :wait_input}
     else
       {value, input} = List.pop_at(input, 0)
 
-      {memory, uma} = write(memory, uma, base, address, value)
+      memory = write(memory, base, address, value)
 
-      do_run(%{state | memory: memory, uma: uma, ip: ip + 2, input: input})
+      do_run(%{state | memory: memory, ip: ip + 2, input: input})
     end
   end
 
   def do_run(
         4,
         [address],
-        %{memory: memory, uma: uma, base: base, ip: ip, output: output} = state
+        %{memory: memory, base: base, ip: ip, output: output} = state
       ) do
-    value = read(memory, uma, base, address)
+    value = read(memory, base, address)
 
     output = List.insert_at(output, -1, value)
 
     do_run(%{state | memory: memory, ip: ip + 2, output: output})
   end
 
-  def do_run(5, [address, new_ip], %{memory: memory, uma: uma, base: base, ip: ip} = state) do
+  def do_run(5, [address, new_ip], %{memory: memory, base: base, ip: ip} = state) do
     ip =
-      case read(memory, uma, base, address) do
+      case read(memory, base, address) do
         0 -> ip + 3
-        _ -> read(memory, uma, base, new_ip)
+        _ -> read(memory, base, new_ip)
       end
 
     do_run(%{state | memory: memory, ip: ip})
   end
 
-  def do_run(6, [address, new_ip], %{memory: memory, uma: uma, base: base, ip: ip} = state) do
+  def do_run(6, [address, new_ip], %{memory: memory, base: base, ip: ip} = state) do
     ip =
-      case read(memory, uma, base, address) do
-        0 -> read(memory, uma, base, new_ip)
+      case read(memory, base, address) do
+        0 -> read(memory, base, new_ip)
         _ -> ip + 3
       end
 
     do_run(%{state | memory: memory, ip: ip})
   end
 
-  def do_run(7, [first, second, outpos], %{memory: memory, uma: uma, base: base, ip: ip} = state) do
-    value = if read(memory, uma, base, first) < read(memory, uma, base, second), do: 1, else: 0
+  def do_run(7, [first, second, outpos], %{memory: memory, base: base, ip: ip} = state) do
+    value = if read(memory, base, first) < read(memory, base, second), do: 1, else: 0
 
-    {memory, uma} = write(memory, uma, base, outpos, value)
+    memory = write(memory, base, outpos, value)
 
-    do_run(%{state | memory: memory, uma: uma, ip: ip + 4})
+    do_run(%{state | memory: memory, ip: ip + 4})
   end
 
-  def do_run(8, [first, second, outpos], %{memory: memory, uma: uma, base: base, ip: ip} = state) do
-    value = if read(memory, uma, base, first) == read(memory, uma, base, second), do: 1, else: 0
+  def do_run(8, [first, second, outpos], %{memory: memory, base: base, ip: ip} = state) do
+    value = if read(memory, base, first) == read(memory, base, second), do: 1, else: 0
 
-    {memory, uma} = write(memory, uma, base, outpos, value)
+    memory = write(memory, base, outpos, value)
 
-    do_run(%{state | memory: memory, uma: uma, ip: ip + 4})
+    do_run(%{state | memory: memory, ip: ip + 4})
   end
 
   def do_run(9, [param], %{base: base, ip: ip} = state) do
@@ -229,6 +223,7 @@ defmodule Computer do
     Map.update!(state, :input, fn input -> List.insert_at(input, -1, value) end)
   end
 
+  def memory(%{memory: memory}), do: Array.to_list(memory)
   def output(%{output: output}), do: output
 
   def consume_output(%{output: output} = state) do

@@ -4,24 +4,20 @@ defmodule Computer.Day05 do
 
   ## Examples
 
-      iex> result = Computer.run([3,0,4,0,99], %{input: [777]})
-      ...> result.output
+      iex> Computer.run([3,0,4,0,99], %{input: [777]}) |> Computer.output()
       [777]
 
-      iex> result = Computer.run([1002,4,3,4,33])
-      ...> result.memory
+      iex> Computer.run([1002,4,3,4,33]) |> Computer.memory()
       [1002,4,3,4,99]
 
       iex> Computer.decode_op(1002)
       {2, [:position, :immediate, :position]}
 
       # Part 2
-      iex> result = Computer.run([3,9,8,9,10,9,4,9,99,-1,8], %{input: [8]})
-      ...> result.output
+      iex> Computer.run([3,9,8,9,10,9,4,9,99,-1,8], %{input: [8]}) |> Computer.output()
       [1]
 
-      iex> result = Computer.run([3,9,8,9,10,9,4,9,99,-1,8], %{input: [777]})
-      ...> result.output
+      iex> Computer.run([3,9,8,9,10,9,4,9,99,-1,8], %{input: [777]}) |> Computer.output()
       [0]
   """
 

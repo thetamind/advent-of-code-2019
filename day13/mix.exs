@@ -27,6 +27,7 @@ defmodule Computer.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:array, github: "mat-hek/elixir-array", ref: "8133653"},
       {:dialyxir, "~> 1.0.0", only: [:dev], runtime: false}
     ]
   end

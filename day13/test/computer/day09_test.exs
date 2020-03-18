@@ -15,15 +15,6 @@ defmodule Computer.Day09Test do
     assert Computer.Day09.part2(input) == [73110]
   end
 
-  test "write with upper memory area support" do
-    assert {[0, 1, 99, 3], _uma} = Computer.write([0, 1, 2, 3], %{}, 0, {:position, 2}, 99)
-
-    assert {[0, 1, 2, 3], %{4 => 99}} = Computer.write([0, 1, 2, 3], %{}, 0, {:position, 4}, 99)
-
-    assert {[0, 1, 2, 3], %{200 => 99}} =
-             Computer.write([0, 1, 2, 3], %{}, 0, {:position, 200}, 99)
-  end
-
   # https://www.reddit.com/r/adventofcode/comments/e8aw9j/2019_day_9_part_1_how_to_fix_203_error/fac3294/
   describe "fix 203 error" do
     test "op 4" do
