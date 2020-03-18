@@ -16,20 +16,57 @@ defmodule Computer.Day13 do
     string
     |> load()
     |> insert_quarters()
-    |> run(%{input: [-1, -1, -1, -1, -1, -1, -1]})
+    |> run()
+    |> play_game()
+    |> score()
   end
 
   def insert_quarters(program), do: List.replace_at(program, 0, 2)
 
-  def inspect(computer) do
-    computer
-    |> output()
+  def score(%{score: score}), do: score
+
+  def play_game(computer, state \\ %{}) do
+    {output, computer} = consume_output(computer)
+    state = Map.merge(state, important_tiles(output))
+
+    case Computer.halted?(computer) do
+      true ->
+        state
+
+      false ->
+        new_computer =
+          computer
+          |> add_input(joystick(state))
+          |> run()
+
+        play_game(new_computer, state)
+    end
+  end
+
+  defp joystick(state) do
+    {ball_x, _y} = Map.get(state, :ball)
+    {paddle_x, _y} = Map.get(state, :paddle)
+
+    joystick(ball_x, paddle_x)
+  end
+
+  defp joystick(ball_x, paddle_x) do
+    cond do
+      paddle_x < ball_x -> 1
+      paddle_x == ball_x -> 0
+      paddle_x > ball_x -> -1
+    end
+  end
+
+  defp important_tiles(output) do
+    output
     |> parse_tiles()
-    |> Enum.filter(fn
-      {:score, _score} -> true
-      {tile, _x, _y} -> tile == :ball || tile == :paddle
+    |> Enum.reduce(%{}, fn
+      {:ball, x, y}, acc -> Map.put(acc, :ball, {x, y})
+      {:paddle, x, y}, acc -> Map.put(acc, :paddle, {x, y})
+      {:score, score}, acc -> Map.put(acc, :score, score)
+      _, acc -> acc
     end)
-    |> Kernel.inspect()
   end
 
   def count(tiles, type) do

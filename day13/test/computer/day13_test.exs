@@ -21,6 +21,11 @@ defmodule Computer.Day13Test do
   end
 
   describe "part 2" do
+    test "solution" do
+      input = File.read!("data/day13.txt")
+      assert Day13.part2(input) == 16539
+    end
+
     test "tick" do
       {output, computer} =
         File.read!("data/day13.txt")
