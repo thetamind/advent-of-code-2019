@@ -73,7 +73,7 @@ defmodule Computer do
   def decode_mode(2), do: :relative
 
   def decode(memory, ip) do
-    slice = Enum.map(ip..(ip + 4 - 1), &Array.get(memory, &1))
+    slice = Enum.slice(memory, ip, 4)
     {op, modes} = decode_op(List.first(slice))
 
     num_params =
